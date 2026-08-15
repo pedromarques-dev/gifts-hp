@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  ChangeEvent,
   Dispatch,
   FormEvent,
   MutableRefObject,
@@ -191,6 +192,51 @@ function useLoopingSoundtrack(enabled: boolean, audioRef: MutableRefObject<HTMLA
   }, [enabled]);
 }
 
+async function fileToDataUrl(file: File) {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error ?? new Error("Falha ao ler a imagem."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function compressImageFile(file: File) {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Arquivo inválido.");
+  }
+
+  const sourceUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("Não consegui carregar a imagem."));
+      img.src = sourceUrl;
+    });
+
+    const maxSide = 1400;
+    const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.width * ratio));
+    canvas.height = Math.max(1, Math.round(image.height * ratio));
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return await fileToDataUrl(file);
+    }
+
+    context.fillStyle = "#0b0f1a";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    return canvas.toDataURL("image/jpeg", 0.86);
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+  }
+}
+
 export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
   const [gifts, setGifts] = useState<Gift[]>(() => initialGifts);
   const [view, setView] = useState<HouseId | "ALL">("ALL");
@@ -200,10 +246,15 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
   const [selectedHouse, setSelectedHouse] = useState<HouseId>("YASMIN");
   const [soundOn, setSoundOn] = useState(true);
   const [owlAlert, setOwlAlert] = useState(false);
+  const [owlFlightActive, setOwlFlightActive] = useState(false);
+  const [owlFlightVersion, setOwlFlightVersion] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [savingGift, setSavingGift] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [greeting, setGreeting] = useState("Bem-vindo");
   const soundtrackRef = useRef<HTMLAudioElement | null>(null);
+  const owlFlightTimerRef = useRef<number | null>(null);
   const [formState, setFormState] = useState<GiftFormState>({
     name: "",
     description: "",
@@ -238,11 +289,51 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
     }
   }
 
+  function launchOwlFlight() {
+    setOwlAlert(true);
+    setOwlFlightVersion((value) => value + 1);
+    setOwlFlightActive(true);
+
+    if (owlFlightTimerRef.current) {
+      window.clearTimeout(owlFlightTimerRef.current);
+    }
+
+    owlFlightTimerRef.current = window.setTimeout(() => {
+      setOwlFlightActive(false);
+      owlFlightTimerRef.current = null;
+    }, 2600);
+  }
+
+  async function handleImageUpload(file: File) {
+    setImageUploading(true);
+
+    try {
+      const imageUrl = await compressImageFile(file);
+      setFormState((current) => ({
+        ...current,
+        imageUrl,
+      }));
+      setToast("Imagem adicionada ao feitiço.");
+    } catch {
+      setToast("Não consegui ler essa imagem.");
+    } finally {
+      setImageUploading(false);
+    }
+  }
+
   useEffect(() => {
     if (!toast) return;
     const timer = window.setTimeout(() => setToast(null), 3600);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    return () => {
+      if (owlFlightTimerRef.current) {
+        window.clearTimeout(owlFlightTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const currentHour = new Date().getHours();
@@ -364,28 +455,37 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (savingGift) return;
 
-    const currentGift = editingGiftId
-      ? gifts.find((gift) => gift.id === editingGiftId)
-      : null;
-    const payload = {
-      id: editingGiftId ?? crypto.randomUUID(),
-      name: formState.name.trim(),
-      description: formState.description.trim(),
-      imageUrl: formState.imageUrl.trim(),
-      productUrl: formState.productUrl.trim() || "#",
-      price: formState.price ? Number(formState.price) : undefined,
-      priority: Number(formState.priority),
-      timeframe: formState.timeframe,
-      status: "WANTED" as const,
-      owner: formState.owner,
-      house: formState.house,
-      createdBy: formState.house.toLowerCase(),
-      receivedAt: currentGift?.receivedAt,
-      createdAt: currentGift?.createdAt ?? new Date().toISOString(),
-    };
+    setSavingGift(true);
 
     try {
+      const currentGift = editingGiftId
+        ? gifts.find((gift) => gift.id === editingGiftId)
+        : null;
+
+      const imageUrl = formState.imageUrl.trim();
+      if (!imageUrl) {
+        throw new Error("Adicione uma imagem ou um link.");
+      }
+
+      const payload = {
+        id: editingGiftId ?? crypto.randomUUID(),
+        name: formState.name.trim(),
+        description: formState.description.trim(),
+        imageUrl,
+        productUrl: formState.productUrl.trim(),
+        price: formState.price ? Number(formState.price) : undefined,
+        priority: Number(formState.priority),
+        timeframe: formState.timeframe,
+        status: "WANTED" as const,
+        owner: formState.owner,
+        house: formState.house,
+        createdBy: formState.house.toLowerCase(),
+        receivedAt: currentGift?.receivedAt,
+        createdAt: currentGift?.createdAt ?? new Date().toISOString(),
+      };
+
       const response = await fetch(editingGiftId ? `/api/gifts/${editingGiftId}` : "/api/gifts", {
         method: editingGiftId ? "PATCH" : "POST",
         headers: {
@@ -414,6 +514,8 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
       resetForm(savedGift.house);
     } catch {
       setToast("Não consegui salvar agora. Tenta de novo em instantes.");
+    } finally {
+      setSavingGift(false);
     }
   }
 
@@ -485,6 +587,8 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
     <main className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,214,153,0.22),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(118,92,255,0.16),transparent_28%),linear-gradient(180deg,rgba(12,15,28,0.96),rgba(8,10,18,1))]" />
       <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_center,black_30%,transparent_90%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[url('/backgrounds/hp-stars.png')] bg-cover bg-center opacity-30 mix-blend-screen" />
+      {owlFlightActive ? <FlyingOwl key={owlFlightVersion} /> : null}
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-7 px-4 py-5 text-amber-50 sm:px-6 lg:px-8">
         <header className="castle-panel overflow-hidden px-5 py-6 sm:px-8 sm:py-8">
@@ -515,11 +619,11 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
                 <span className="castle-chip px-3 py-2 text-sm text-amber-50">{mapLine}</span>
                 <button
                   type="button"
-                  onClick={() => setOwlAlert((value) => !value)}
+                  onClick={launchOwlFlight}
                   className="group inline-flex items-center gap-2 castle-chip px-3 py-2 text-amber-50 transition hover:bg-amber-200/12"
                 >
                   <span className="transition duration-300 group-hover:-translate-y-1">🦉</span>
-                  {owlAlert ? "Coruja em voo." : "Tocar coruja"}
+                  {owlFlightActive ? "Coruja em voo." : "Tocar coruja"}
                 </button>
                 <button
                   type="button"
@@ -949,6 +1053,9 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
           selectedHouse={selectedHouse}
           onClose={() => setComposerOpen(false)}
           onSubmit={handleSubmit}
+          onImageUpload={handleImageUpload}
+          savingGift={savingGift}
+          imageUploading={imageUploading}
           setFormState={setFormState}
         />
 
@@ -1052,6 +1159,9 @@ function GiftComposerModal({
   selectedHouse,
   onClose,
   onSubmit,
+  onImageUpload,
+  savingGift,
+  imageUploading,
   setFormState,
 }: {
   open: boolean;
@@ -1060,6 +1170,9 @@ function GiftComposerModal({
   selectedHouse: HouseId;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onImageUpload: (file: File) => Promise<void>;
+  savingGift: boolean;
+  imageUploading: boolean;
   setFormState: Dispatch<SetStateAction<GiftFormState>>;
 }) {
   if (!open) return null;
@@ -1156,18 +1269,63 @@ function GiftComposerModal({
           </Field>
 
           <Field label="Imagem do presente">
-            <input
-              required
-              value={formState.imageUrl}
-              onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  imageUrl: event.target.value,
-                }))
-              }
-              className="input"
-              placeholder="https://..."
-            />
+            <div className="space-y-3">
+              <div className="castle-panel-soft overflow-hidden">
+                {formState.imageUrl ? (
+                  <img
+                    src={formState.imageUrl}
+                    alt="Pré-visualização da imagem do presente"
+                    className="h-40 w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-40 items-center justify-center px-4 text-center text-sm text-amber-100/60">
+                    Envie uma foto do celular ou cole um link de imagem.
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <label className={`castle-chip cursor-pointer px-4 py-3 text-xs uppercase tracking-[0.24em] text-amber-50 ${imageUploading ? "opacity-70" : ""}`}>
+                  {imageUploading ? "Processando foto..." : "Enviar foto do celular"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="sr-only"
+                    disabled={imageUploading}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                      const file = event.target.files?.[0];
+                      if (file) void onImageUpload(file);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormState((current) => ({
+                      ...current,
+                      imageUrl: "",
+                    }))
+                  }
+                  className="castle-chip px-4 py-3 text-xs uppercase tracking-[0.24em] text-amber-100/75"
+                >
+                  Limpar imagem
+                </button>
+              </div>
+
+              <input
+                value={formState.imageUrl}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    imageUrl: event.target.value,
+                  }))
+                }
+                className="input"
+                placeholder="Link da imagem ou use a foto enviada acima"
+              />
+            </div>
           </Field>
 
           <Field label="Observação">
@@ -1300,9 +1458,15 @@ function GiftComposerModal({
               </button>
               <button
                 type="submit"
-                className="castle-chip bg-amber-200/15 px-4 py-3 text-xs uppercase tracking-[0.24em] text-amber-50"
+                disabled={savingGift}
+                className="castle-chip bg-amber-200/15 px-4 py-3 text-xs uppercase tracking-[0.24em] text-amber-50 disabled:cursor-wait disabled:opacity-70"
               >
-                {editingGiftId ? "Salvar alteração" : "Salvar desejo"}
+                {savingGift ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                    Salvando...
+                  </span>
+                ) : editingGiftId ? "Salvar alteração" : "Salvar desejo"}
               </button>
             </div>
           </div>
@@ -1652,13 +1816,17 @@ function GiftCard({
           <ActionButton onClick={() => onDelete(gift.id)}>Excluir</ActionButton>
         </div>
 
-        <a
-          href={gift.productUrl}
-          className="inline-flex items-center gap-2 text-sm text-amber-200 transition hover:text-amber-100"
-        >
-          Ver presente
-          <span aria-hidden>↗</span>
-        </a>
+        {gift.productUrl.trim() ? (
+          <a
+            href={gift.productUrl}
+            className="inline-flex items-center gap-2 text-sm text-amber-200 transition hover:text-amber-100"
+          >
+            Ver presente
+            <span aria-hidden>↗</span>
+          </a>
+        ) : (
+          <p className="text-sm text-amber-100/55">Sem link de produto, só magia.</p>
+        )}
       </div>
     </article>
   );
@@ -1691,6 +1859,23 @@ function EmptyState({ title }: { title: string }) {
       <p className="mt-3 text-sm leading-6">
         Ajuste os filtros ou invoque um novo desejo na torre de magia.
       </p>
+    </div>
+  );
+}
+
+function FlyingOwl() {
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[70] overflow-hidden">
+      <div className="owl-flight-shadow" />
+      <div className="owl-flight-trail" />
+      <div className="owl-flight-spark owl-flight-spark--one" />
+      <div className="owl-flight-spark owl-flight-spark--two" />
+      <div className="owl-flight-spark owl-flight-spark--three" />
+      <div className="owl-flight">
+        <div className="owl-flight-wing owl-flight-wing--left" />
+        <div className="owl-flight-wing owl-flight-wing--right" />
+        <div className="owl-flight-body">🦉</div>
+      </div>
     </div>
   );
 }
