@@ -2,40 +2,14 @@
 
 import type { Dispatch, FormEvent, ReactNode, SetStateAction } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-type HouseId = "YASMIN" | "PEDRO";
-type GiftTimeframe = "SHORT" | "MEDIUM" | "LONG" | "ANY";
-type GiftStatus = "WANTED" | "RECEIVED";
-type GiftOwner = "ME" | "HER";
-
-type Gift = {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  productUrl: string;
-  price?: number;
-  priority: number;
-  timeframe: Exclude<GiftTimeframe, "ANY">;
-  status: GiftStatus;
-  owner: GiftOwner;
-  house: HouseId;
-  createdBy: string;
-  receivedAt?: string;
-  createdAt: string;
-};
-
-type GiftFormState = {
-  name: string;
-  description: string;
-  imageUrl: string;
-  productUrl: string;
-  price: string;
-  priority: string;
-  timeframe: Exclude<GiftTimeframe, "ANY">;
-  owner: GiftOwner;
-  house: HouseId;
-};
+import type {
+  Gift,
+  GiftFormState,
+  GiftOwner,
+  GiftStatus,
+  GiftTimeframe,
+  HouseId,
+} from "../lib/gifts";
 
 type HouseConfig = {
   id: HouseId;
@@ -109,8 +83,6 @@ const houseBadgeCrests: Record<string, string> = {
   SLYTHERIN: "/houses/slytherin.png",
   HUFFLEPUFF: "/houses/hufflepuff.png",
 };
-
-const initialGifts: Gift[] = [];
 
 const levels = [
   "Aprendiz do Armário",
@@ -240,8 +212,8 @@ function useWizardSoundtrack(enabled: boolean) {
   }, [enabled]);
 }
 
-export function MagicalHome() {
-  const [gifts, setGifts] = useState(initialGifts);
+export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
+  const [gifts, setGifts] = useState<Gift[]>(() => initialGifts);
   const [view, setView] = useState<HouseId | "ALL">("ALL");
   const [timeframeFilter, setTimeframeFilter] = useState<GiftTimeframe | "ANY">("ANY");
   const [statusFilter, setStatusFilter] = useState<GiftStatus | "ANY">("ANY");
@@ -367,10 +339,13 @@ export function MagicalHome() {
     setComposerOpen(true);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextGift: Gift = {
+    const currentGift = editingGiftId
+      ? gifts.find((gift) => gift.id === editingGiftId)
+      : null;
+    const payload = {
       id: editingGiftId ?? crypto.randomUUID(),
       name: formState.name.trim(),
       description: formState.description.trim(),
@@ -379,25 +354,44 @@ export function MagicalHome() {
       price: formState.price ? Number(formState.price) : undefined,
       priority: Number(formState.priority),
       timeframe: formState.timeframe,
-      status: "WANTED",
+      status: "WANTED" as const,
       owner: formState.owner,
       house: formState.house,
       createdBy: formState.house.toLowerCase(),
-      createdAt: new Date().toISOString(),
+      receivedAt: currentGift?.receivedAt,
+      createdAt: currentGift?.createdAt ?? new Date().toISOString(),
     };
 
-    setGifts((current) => {
-      if (editingGiftId) {
-        return current.map((gift) =>
-          gift.id === editingGiftId ? { ...gift, ...nextGift } : gift,
-        );
-      }
-      return [nextGift, ...current];
-    });
+    try {
+      const response = await fetch(editingGiftId ? `/api/gifts/${editingGiftId}` : "/api/gifts", {
+        method: editingGiftId ? "PATCH" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    setToast(editingGiftId ? "Desejo alterado com sucesso." : "Novo desejo adicionado ao cofre.");
-    setComposerOpen(false);
-    resetForm(nextGift.house);
+      if (!response.ok) {
+        throw new Error("Não foi possível salvar o presente.");
+      }
+
+      const data = (await response.json()) as { gift: Gift };
+      const savedGift = data.gift;
+
+      setGifts((current) => {
+        if (editingGiftId) {
+          return current.map((gift) => (gift.id === editingGiftId ? savedGift : gift));
+        }
+
+        return [savedGift, ...current];
+      });
+
+      setToast(editingGiftId ? "Desejo alterado com sucesso." : "Novo desejo adicionado ao cofre.");
+      setComposerOpen(false);
+      resetForm(savedGift.house);
+    } catch {
+      setToast("Não consegui salvar agora. Tenta de novo em instantes.");
+    }
   }
 
   function editGift(gift: Gift) {
@@ -417,25 +411,49 @@ export function MagicalHome() {
     setComposerOpen(true);
   }
 
-  function deleteGift(id: string) {
-    setGifts((current) => current.filter((gift) => gift.id !== id));
-    setToast("Desejo removido do mapa.");
+  async function deleteGift(id: string) {
+    try {
+      const response = await fetch(`/api/gifts/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Não foi possível excluir o presente.");
+      }
+
+      setGifts((current) => current.filter((gift) => gift.id !== id));
+      setToast("Desejo removido do mapa.");
+    } catch {
+      setToast("Não consegui excluir agora. Tenta de novo em instantes.");
+    }
   }
 
-  function markAsReceived(id: string) {
-    setGifts((current) =>
-      current.map((gift) =>
-        gift.id === id
-          ? {
-              ...gift,
-              status: "RECEIVED",
-              receivedAt: new Date().toISOString(),
-            }
-          : gift,
-      ),
-    );
-    setToast("✦ Desejo realizado ✦");
-    if (navigator.vibrate) navigator.vibrate(40);
+  async function markAsReceived(id: string) {
+    try {
+      const response = await fetch(`/api/gifts/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "RECEIVED",
+          receivedAt: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Não foi possível atualizar o presente.");
+      }
+
+      const data = (await response.json()) as { gift: Gift };
+      setGifts((current) =>
+        current.map((gift) => (gift.id === id ? data.gift : gift)),
+      );
+      setToast("✦ Desejo realizado ✦");
+      if (navigator.vibrate) navigator.vibrate(40);
+    } catch {
+      setToast("Não consegui marcar como recebido agora.");
+    }
   }
 
   const mapLine = `${totalReceived} comprados · ${totalWanted} em aberto · ${receivedRate}% concluído`;
@@ -1284,8 +1302,8 @@ function HouseColumn({
   };
   gifts: Gift[];
   onEdit: (gift: Gift) => void;
-  onDelete: (id: string) => void;
-  onReceive: (id: string) => void;
+  onDelete: (id: string) => void | Promise<void>;
+  onReceive: (id: string) => void | Promise<void>;
 }) {
   const grouped = {
     SHORT: gifts.filter((gift) => gift.timeframe === "SHORT"),
