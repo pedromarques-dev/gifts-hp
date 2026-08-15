@@ -42,6 +42,9 @@ type HouseConfig = {
   label: string;
   subtitle: string;
   pronoun: string;
+  schoolHouse: string;
+  symbol: string;
+  icon: string;
   accent: string;
   glow: string;
   crest: string;
@@ -51,8 +54,11 @@ const houses: Record<HouseId, HouseConfig> = {
   YASMIN: {
     id: "YASMIN",
     label: "Yasmin",
-    subtitle: "A torre das vontades delicadas e úteis",
+    subtitle: "Bruxa da Corvinal, com olho fino para detalhe e elegância.",
     pronoun: "ela",
+    schoolHouse: "Corvinal",
+    symbol: "🦅",
+    icon: "✦",
     accent: "from-emerald-300 via-cyan-300 to-sky-200",
     glow: "rgba(87, 234, 208, 0.22)",
     crest: "Y",
@@ -60,8 +66,11 @@ const houses: Record<HouseId, HouseConfig> = {
   PEDRO: {
     id: "PEDRO",
     label: "Pedro",
-    subtitle: "A torre dos trajes, treinos e engenhocas",
+    subtitle: "Bruxo da Grifinória, pronto para treino, saída e inventos.",
     pronoun: "ele",
+    schoolHouse: "Grifinória",
+    symbol: "🦁",
+    icon: "⚡",
     accent: "from-amber-300 via-orange-300 to-rose-200",
     glow: "rgba(250, 190, 87, 0.22)",
     crest: "P",
@@ -87,8 +96,8 @@ const ownerLabels: Record<GiftOwner, string> = {
 
 const houseFilters: Array<{ label: string; value: HouseId | "ALL" }> = [
   { label: "Mural completo", value: "ALL" },
-  { label: "Yasmin", value: "YASMIN" },
-  { label: "Pedro", value: "PEDRO" },
+  { label: "Yasmin / Corvinal", value: "YASMIN" },
+  { label: "Pedro / Grifinória", value: "PEDRO" },
 ];
 
 const initialGifts: Gift[] = [
@@ -612,87 +621,105 @@ export function MagicalHome() {
       <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_center,black_30%,transparent_90%)]" />
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-7 px-4 py-5 text-amber-50 sm:px-6 lg:px-8">
-        <header className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 px-5 py-6 shadow-[0_24px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:px-8 sm:py-8">
+        <header className="castle-panel overflow-hidden px-5 py-6 sm:px-8 sm:py-8">
           <div className="absolute -right-10 top-6 h-36 w-36 rounded-full bg-amber-300/10 blur-3xl" />
-          <div className="absolute left-8 top-0 h-24 w-24 rounded-full bg-violet-400/10 blur-3xl" />
+          <div className="absolute left-8 top-0 h-24 w-24 rounded-full bg-cyan-400/10 blur-3xl" />
+          <div className="absolute inset-0 castle-etch opacity-35" />
 
-          <div className="relative flex flex-col gap-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-black/20 px-3 py-1 text-[0.72rem] uppercase tracking-[0.28em] text-amber-200/90">
-                  <span className="text-amber-300">✦</span> The Room of Wishes
-                </div>
-
-                <div className="space-y-3">
-                  <p className="font-[family-name:var(--font-display)] text-sm tracking-[0.3em] text-amber-100/80 uppercase">
-                    {greeting}, o cofre está avaliando a missão do casal
-                  </p>
-                  <h1 className="max-w-2xl font-[family-name:var(--font-display)] text-4xl leading-[0.92] font-semibold tracking-tight text-balance text-amber-50 sm:text-5xl lg:text-7xl">
-                    Dois quartos. Uma aventura. Um status de bruxo que sobe com cada presente.
-                  </h1>
-                  <p className="max-w-2xl text-base leading-7 text-amber-100/78 sm:text-lg">
-                    A sala se comporta como um jogo leve: cada item comprado dá XP,
-                    a torre ganha níveis e a lista vira memória viva dos dois.
-                  </p>
-                </div>
+          <div className="relative grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 castle-chip px-3 py-1 text-[0.72rem] uppercase tracking-[0.28em] text-amber-200/90">
+                <span className="text-amber-300">✦</span> The Room of Wishes
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3 lg:w-[28rem] lg:grid-cols-1">
-                <StatPanel label="Nível de bruxo" value={`Nível ${overallLevel.level}`} detail={overallLevel.title} />
-                <StatPanel label="XP total" value={combinedXp} detail={`${mapLine}`} />
-                <StatPanel label="Feitiço ativo" value={`${gifts.length} desejos`} detail="cada carta vale XP" />
+              <div className="space-y-4">
+                <p className="font-[family-name:var(--font-display)] text-sm tracking-[0.3em] text-amber-100/80 uppercase">
+                  {greeting}, o castelo está organizando as casas
+                </p>
+                <h1 className="max-w-2xl font-[family-name:var(--font-display)] text-4xl leading-[0.9] font-semibold tracking-tight text-balance text-amber-50 sm:text-5xl lg:text-7xl">
+                  Uma sala de presentes com brasões, feitiços e o clima certo de Hogwarts.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-amber-100/78 sm:text-lg">
+                  Menos cartão arredondado, mais salão de pedra. Cada desejo vira uma peça do mapa,
+                  e cada casa ganha presença com seus ícones, referências e espaço para crescer.
+                </p>
               </div>
-            </div>
 
-            <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto_auto]">
-              <div className="flex flex-wrap items-center gap-3 text-sm text-amber-100/70">
-                <span className="rounded-full border border-amber-200/15 bg-black/25 px-3 py-2">
-                  {mapLine}
-                </span>
+              <div className="flex flex-wrap gap-2">
+                <span className="castle-chip px-3 py-2 text-sm text-amber-50">{mapLine}</span>
                 <button
                   type="button"
                   onClick={() => setOwlAlert((value) => !value)}
-                  className="group inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-amber-200/10 px-3 py-2 text-amber-50 transition hover:bg-amber-200/18"
+                  className="group inline-flex items-center gap-2 castle-chip px-3 py-2 text-amber-50 transition hover:bg-amber-200/12"
                 >
-                  <span className="transition duration-300 group-hover:-translate-y-1">
-                    🦉
-                  </span>
+                  <span className="transition duration-300 group-hover:-translate-y-1">🦉</span>
                   {owlAlert ? "Coruja em voo." : "Tocar coruja"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setSoundOn((value) => !value)}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-amber-100/80 transition hover:bg-white/10"
+                  className="castle-chip px-3 py-2 text-sm text-amber-100/80 transition hover:bg-white/10"
                 >
                   {soundOn ? "Som ligado" : "Trilha mágica original"}
                 </button>
               </div>
-              <FilterPill active={timeframeFilter === "ANY"} label="Todos os prazos" onClick={() => setTimeframeFilter("ANY")} />
-              <FilterPill active={statusFilter === "ANY"} label="Todos os status" onClick={() => setStatusFilter("ANY")} />
-              <div className="flex gap-2">
-                {houseFilters.map((item) => (
-                  <FilterPill
-                    key={item.value}
-                    active={view === item.value}
-                    label={item.label}
-                    onClick={() => setView(item.value)}
-                  />
+
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  { label: "Grifinória", icon: "🦁", tone: "text-amber-200" },
+                  { label: "Sonserina", icon: "🐍", tone: "text-emerald-200" },
+                  { label: "Corvinal", icon: "🦅", tone: "text-sky-200" },
+                  { label: "Lufa-Lufa", icon: "🦡", tone: "text-yellow-100" },
+                ].map((house) => (
+                  <div key={house.label} className="castle-panel-soft flex items-center gap-3 px-4 py-3">
+                    <span className={`text-2xl ${house.tone}`}>{house.icon}</span>
+                    <div>
+                      <p className="text-[0.72rem] uppercase tracking-[0.24em] text-amber-100/55">Casa</p>
+                      <p className="font-[family-name:var(--font-display)] text-xl text-amber-50">
+                        {house.label}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {owlAlert ? (
-              <p className="rounded-2xl border border-amber-200/20 bg-amber-300/10 px-4 py-3 text-sm text-amber-50">
-                Uma pena caiu do teto e trouxe um lembrete: o próximo presente pode
-                ser simples, mas a história que ele cria ainda fica gigante.
-              </p>
-            ) : null}
+            <div className="castle-panel-soft overflow-hidden p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.28em] text-amber-200/60">
+                    Ala dos personagens
+                  </p>
+                  <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                    Harry, Rony e Hermione
+                  </h2>
+                </div>
+                <span className="castle-chip px-3 py-1 text-[0.72rem] uppercase tracking-[0.22em] text-amber-100/75">
+                  Hogwarts
+                </span>
+              </div>
+
+              <HogwartsMural />
+
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <HeroStat label="Nível" value={`Nível ${overallLevel.level}`} />
+                <HeroStat label="XP total" value={combinedXp} />
+                <HeroStat label="Desejos" value={gifts.length} />
+              </div>
+            </div>
           </div>
+
+          {owlAlert ? (
+            <p className="relative mt-5 castle-panel-soft px-4 py-3 text-sm text-amber-50">
+              Uma pena caiu do teto e trouxe um lembrete: o próximo presente pode ser simples,
+              mas o cofre continua crescendo bonito.
+            </p>
+          ) : null}
         </header>
 
         <section className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
           <div className="space-y-6">
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-4 shadow-[0_20px_80px_rgba(0,0,0,0.32)] backdrop-blur-xl sm:p-5">
+            <div className="castle-panel p-4 sm:p-5">
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -771,7 +798,7 @@ export function MagicalHome() {
               </div>
             )}
 
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+            <section className="castle-panel p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
@@ -781,7 +808,7 @@ export function MagicalHome() {
                     Memórias que já viraram conquista
                   </h2>
                 </div>
-                <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-emerald-100">
+                <span className="castle-chip px-3 py-1 text-xs uppercase tracking-[0.2em] text-emerald-100">
                   {receivedGifts.length} itens
                 </span>
               </div>
@@ -791,31 +818,29 @@ export function MagicalHome() {
                   receivedGifts.map((gift) => (
                     <article
                       key={gift.id}
-                      className="rounded-3xl border border-white/10 bg-[#100f1a]/80 p-4"
+                      className="castle-panel-soft p-4"
                     >
-                      <div className="flex gap-3">
-                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-amber-300/10">
-                          <img
-                            src={gift.imageUrl}
-                            alt={gift.name}
-                            className="h-full w-full object-cover opacity-85"
-                          />
+                      <div className="flex items-start gap-3">
+                        <div className="glyph-panel flex h-14 w-14 shrink-0 items-center justify-center text-2xl text-amber-50">
+                          {gift.house === "YASMIN" ? "🦅" : "🦁"}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <h3 className="truncate font-medium text-amber-50">
+                              <p className="text-[0.66rem] uppercase tracking-[0.24em] text-amber-100/55">
+                                {houses[gift.house].schoolHouse}
+                              </p>
+                              <h3 className="truncate font-[family-name:var(--font-display)] text-2xl text-amber-50">
                                 {gift.name}
                               </h3>
-                              <p className="text-xs uppercase tracking-[0.24em] text-amber-100/55">
-                                {houses[gift.house].label} · recebido em{" "}
-                                {formatDate(gift.receivedAt ?? gift.createdAt)}
-                              </p>
                             </div>
-                            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-emerald-100">
+                            <span className="castle-chip px-2 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-emerald-100">
                               ✦
                             </span>
                           </div>
+                          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-amber-100/55">
+                            recebido em {formatDate(gift.receivedAt ?? gift.createdAt)}
+                          </p>
                           <p className="mt-2 text-sm leading-6 text-amber-100/74">
                             {gift.description}
                           </p>
@@ -829,30 +854,62 @@ export function MagicalHome() {
               </div>
             </section>
 
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+            <section className="castle-panel p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
-                    Galeria mágica
+                    Mural de Hogwarts
                   </p>
                   <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
-                    Personagens e relíquias do cofre
+                    Casas, símbolos e a turma do castelo
                   </h2>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em] text-amber-100/70">
-                  original svg
+                <span className="castle-chip px-3 py-1 text-xs uppercase tracking-[0.22em] text-amber-100/70">
+                  ícones e brasões
                 </span>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {wizardGallery.map((item) => (
-                  <WizardCard key={item.name} item={item} />
+                {[
+                  {
+                    title: "Grifinória",
+                    icon: "🦁",
+                    text: "coragem, impulso e faísca",
+                  },
+                  {
+                    title: "Sonserina",
+                    icon: "🐍",
+                    text: "astúcia, foco e presença",
+                  },
+                  {
+                    title: "Corvinal",
+                    icon: "🦅",
+                    text: "mente afiada e detalhe",
+                  },
+                  {
+                    title: "Lufa-Lufa",
+                    icon: "🦡",
+                    text: "cuidado, constância e aconchego",
+                  },
+                ].map((item) => (
+                  <article key={item.title} className="castle-panel-soft p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-3xl">{item.icon}</span>
+                      <span className="castle-chip px-2 py-1 text-[0.65rem] uppercase tracking-[0.24em] text-amber-100/70">
+                        Hogwarts
+                      </span>
+                    </div>
+                    <h3 className="mt-4 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-amber-100/72">{item.text}</p>
+                  </article>
                 ))}
               </div>
             </section>
           </div>
 
           <aside className="space-y-5">
-            <div className="rounded-[2rem] border border-amber-200/15 bg-[#171529]/90 p-5 shadow-[0_24px_100px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+            <div className="castle-panel p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
@@ -865,7 +922,7 @@ export function MagicalHome() {
                 <button
                   type="button"
                   onClick={() => resetForm(selectedHouse)}
-                  className="rounded-full border border-white/10 px-3 py-2 text-xs uppercase tracking-[0.24em] text-amber-100/70 transition hover:bg-white/5"
+                  className="castle-chip px-3 py-2 text-xs uppercase tracking-[0.24em] text-amber-100/70 transition hover:bg-white/5"
                 >
                   Limpar
                 </button>
@@ -914,21 +971,6 @@ export function MagicalHome() {
                     }
                     className="input"
                     placeholder="Ex: monitor fino para o MacBook"
-                  />
-                </Field>
-
-                <Field label="Foto / ilustração">
-                  <input
-                    required
-                    value={formState.imageUrl}
-                    onChange={(event) =>
-                      setFormState((current) => ({
-                        ...current,
-                        imageUrl: event.target.value,
-                      }))
-                    }
-                    className="input"
-                    placeholder="https://..."
                   />
                 </Field>
 
@@ -1058,14 +1100,14 @@ export function MagicalHome() {
 
                 <button
                   type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-amber-300 via-orange-300 to-amber-200 px-5 py-4 font-medium text-slate-950 shadow-[0_16px_40px_rgba(249,201,110,0.26)] transition hover:scale-[1.01]"
+                  className="w-full castle-panel-soft px-5 py-4 font-medium text-slate-950 transition hover:scale-[1.01]"
                 >
                   {editingGiftId ? "✦ Salvar alteração" : "✦ Salvar desejo"}
                 </button>
               </form>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+            <div className="castle-panel p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
@@ -1075,7 +1117,7 @@ export function MagicalHome() {
                     Evolução do bruxo
                   </h2>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em] text-amber-100/70">
+                <span className="castle-chip px-3 py-1 text-xs uppercase tracking-[0.22em] text-amber-100/70">
                   {overallLevel.title}
                 </span>
               </div>
@@ -1109,7 +1151,7 @@ export function MagicalHome() {
         </section>
 
         {toast ? (
-          <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-full border border-amber-200/20 bg-slate-950/90 px-4 py-3 text-sm text-amber-50 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+          <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 -translate-x-1/2 castle-panel-soft px-4 py-3 text-sm text-amber-50">
             {toast}
           </div>
         ) : null}
@@ -1157,9 +1199,9 @@ function ProgressSection({
           {value}/{max} XP
         </span>
       </div>
-      <div className="h-3 rounded-full bg-white/8">
+      <div className="h-3 bg-white/8">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-amber-300 via-orange-300 to-amber-100 shimmer"
+          className="h-full bg-gradient-to-r from-amber-300 via-orange-300 to-amber-100 shimmer"
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -1175,7 +1217,7 @@ function MiniStat({
   value: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+    <div className="castle-panel-soft px-4 py-3">
       <p className="text-[0.68rem] uppercase tracking-[0.2em] text-amber-100/55">{label}</p>
       <p className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
         {value}
@@ -1229,80 +1271,79 @@ function HouseColumn({
   };
 
   return (
-    <article className="rounded-[2rem] border border-white/10 bg-[#101225]/90 shadow-[0_18px_70px_rgba(0,0,0,0.36)] backdrop-blur-xl">
-      <div className={`rounded-[2rem] bg-gradient-to-br ${house.accent} p-[1px]`}>
-        <div className="rounded-[calc(2rem-1px)] bg-[#101225]/95 p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] uppercase tracking-[0.28em] text-amber-100/75">
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-amber-50">
-                  {house.crest}
-                </span>
-                {house.label}
-              </div>
+    <article className="castle-panel overflow-hidden">
+      <div className={`h-2 bg-gradient-to-r ${house.accent}`} />
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 castle-chip px-3 py-1 text-[0.72rem] uppercase tracking-[0.28em] text-amber-100/75">
+              <span className="text-lg">{house.symbol}</span>
+              {house.label}
+            </div>
+            <div>
               <h3 className="font-[family-name:var(--font-display)] text-4xl leading-none text-amber-50">
-                {house.label}
+                {house.schoolHouse}
               </h3>
-              <p className="max-w-md text-sm leading-6 text-amber-100/70">
+              <p className="mt-2 max-w-md text-sm leading-6 text-amber-100/70">
                 {house.subtitle}
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-xs uppercase tracking-[0.28em] text-amber-100/55">
-                nível
-              </p>
-              <p className="font-[family-name:var(--font-display)] text-4xl text-amber-50">
-                {stats.level}
-              </p>
-              <p className="text-sm text-amber-100/70">{stats.title}</p>
-            </div>
           </div>
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-[0.28em] text-amber-100/55">
+              nível da torre
+            </p>
+            <p className="font-[family-name:var(--font-display)] text-4xl text-amber-50">
+              Nível {stats.level.level}
+            </p>
+            <p className="text-sm text-amber-100/70">{stats.level.title}</p>
+          </div>
+        </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-3 gap-3">
             <HouseMini label="Pendentes" value={stats.wanted} />
             <HouseMini label="Comprados" value={stats.received} />
             <HouseMini label="Concluído" value={`${stats.percent}%`} />
           </div>
 
-          <div className="mt-4">
-            <ProgressSection label={`${house.label} XP`} value={stats.xp} max={stats.nextThreshold} />
-          </div>
+        <div className="mt-4">
+          <ProgressSection label={`${house.label} XP`} value={stats.xp} max={stats.nextThreshold} />
+        </div>
 
-          <div className="mt-5 space-y-4">
-            {(["SHORT", "MEDIUM", "LONG"] as const).map((timeframe) => (
-              <section key={timeframe} className="space-y-3">
-                <div className="flex items-end justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.26em] text-amber-200/55">
-                      {timeframeShortLabels[timeframe]}
-                    </p>
-                    <h4 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
-                      {timeframeLabels[timeframe]}
-                    </h4>
+        <div className="mt-5 space-y-4">
+          {(["SHORT", "MEDIUM", "LONG"] as const).map((timeframe) => (
+            <section key={timeframe} className="space-y-3">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.26em] text-amber-200/55">
+                    {timeframeShortLabels[timeframe]}
+                  </p>
+                  <h4 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                    {timeframeLabels[timeframe]}
+                  </h4>
+                </div>
+                <p className="text-sm text-amber-100/65">{grouped[timeframe].length} itens</p>
+              </div>
+
+              <div className="grid gap-3">
+                {grouped[timeframe].length > 0 ? (
+                  grouped[timeframe].map((gift) => (
+                    <GiftCard
+                      key={gift.id}
+                      gift={gift}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onReceive={onReceive}
+                    />
+                  ))
+                ) : (
+                  <div className="castle-panel-soft px-4 py-6 text-sm text-amber-100/60">
+                    Nenhum desejo neste prazo ainda.
                   </div>
-                  <p className="text-sm text-amber-100/65">{grouped[timeframe].length} itens</p>
-                </div>
-
-                <div className="grid gap-3">
-                  {grouped[timeframe].length > 0 ? (
-                    grouped[timeframe].map((gift) => (
-                      <GiftCard
-                        key={gift.id}
-                        gift={gift}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onReceive={onReceive}
-                      />
-                    ))
-                  ) : (
-                    <div className="rounded-2xl border border-dashed border-white/12 bg-white/4 px-4 py-6 text-sm text-amber-100/60">
-                      Nenhum desejo neste prazo ainda.
-                    </div>
-                  )}
-                </div>
-              </section>
-            ))}
-          </div>
+                )}
+              </div>
+            </section>
+          ))}
         </div>
       </div>
     </article>
@@ -1317,11 +1358,110 @@ function HouseMini({
   value: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+    <div className="castle-panel-soft px-4 py-3">
       <p className="text-[0.68rem] uppercase tracking-[0.2em] text-amber-100/55">{label}</p>
       <p className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
         {value}
       </p>
+    </div>
+  );
+}
+
+function HeroStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="castle-panel-soft px-4 py-3">
+      <p className="text-[0.66rem] uppercase tracking-[0.24em] text-amber-100/55">
+        {label}
+      </p>
+      <p className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function HogwartsMural() {
+  const trio = [
+    {
+      name: "Harry",
+      icon: "⚡",
+      house: "Grifinória",
+      note: "o impulso do trio",
+      glow: "from-amber-300/40 to-orange-300/10",
+    },
+    {
+      name: "Rony",
+      icon: "♟",
+      house: "Grifinória",
+      note: "o coração e o humor",
+      glow: "from-rose-300/30 to-orange-200/10",
+    },
+    {
+      name: "Hermione",
+      icon: "📚",
+      house: "Corvinal",
+      note: "a estratégia que costura tudo",
+      glow: "from-sky-300/30 to-cyan-200/10",
+    },
+  ] as const;
+
+  return (
+    <div className="relative mt-4 overflow-hidden border border-white/10 bg-[linear-gradient(180deg,rgba(15,18,30,0.98),rgba(8,10,16,0.98))]">
+      <div className="absolute inset-0 opacity-50 castle-etch" />
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(11,12,18,0.92))]" />
+      <div className="relative grid gap-3 p-3 sm:grid-cols-3">
+        {trio.map((person) => (
+          <article
+            key={person.name}
+            className="castle-panel-soft min-h-44 overflow-hidden p-4"
+          >
+            <div className={`absolute inset-0 bg-gradient-to-br ${person.glow}`} />
+            <div className="relative flex h-full flex-col justify-between gap-4">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-[0.66rem] uppercase tracking-[0.24em] text-amber-100/55">
+                    Bruxo do salão
+                  </p>
+                  <h3 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                    {person.name}
+                  </h3>
+                </div>
+                <span className="text-2xl">{person.icon}</span>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm leading-6 text-amber-100/72">{person.note}</p>
+                <span className="inline-flex items-center gap-2 castle-chip px-3 py-1 text-[0.72rem] uppercase tracking-[0.22em] text-amber-100/80">
+                  {person.house}
+                </span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="relative border-t border-white/10 px-4 py-3">
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { label: "Grifinória", icon: "🦁", tone: "text-amber-200" },
+            { label: "Sonserina", icon: "🐍", tone: "text-emerald-200" },
+            { label: "Corvinal", icon: "🦅", tone: "text-sky-200" },
+            { label: "Lufa-Lufa", icon: "🦡", tone: "text-yellow-100" },
+          ].map((house) => (
+            <div
+              key={house.label}
+              className="castle-chip flex items-center justify-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.22em] text-amber-50"
+            >
+              <span className={`text-sm ${house.tone}`}>{house.icon}</span>
+              <span>{house.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1337,73 +1477,67 @@ function GiftCard({
   onDelete: (id: string) => void;
   onReceive: (id: string) => void;
 }) {
-  const frame =
-    gift.house === "YASMIN"
-      ? "from-emerald-300/30 via-cyan-300/20 to-sky-200/30"
-      : "from-amber-300/30 via-orange-300/20 to-rose-200/30";
-
   return (
-    <article className="group relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#121325]/92 shadow-[0_16px_50px_rgba(0,0,0,0.35)] transition hover:-translate-y-1 hover:border-amber-200/20">
-      <div className={`absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,207,124,0.12),transparent_30%)] opacity-0 transition group-hover:opacity-100`} />
-      <div className="relative">
-        <div className="grid gap-3 p-4 sm:grid-cols-[0.95fr_1.05fr]">
-          <div className={`rounded-[1.4rem] bg-gradient-to-br ${frame} p-[1px]`}>
-            <div className="relative overflow-hidden rounded-[calc(1.4rem-1px)] bg-[#0f1222]">
-              <div className="absolute inset-0 opacity-40">
-                <MagicalGlyph type={gift.timeframe} />
-              </div>
-              <img
-                src={gift.imageUrl}
-                alt={gift.name}
-                className="relative h-full min-h-36 w-full object-cover opacity-85"
-              />
-            </div>
+    <article className="group overflow-hidden castle-panel-soft transition hover:-translate-y-1">
+      <div className="grid gap-0 md:grid-cols-[7.5rem_1fr]">
+        <div className="relative flex min-h-44 flex-col justify-between border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,214,122,0.12),rgba(255,255,255,0.02))] p-4 md:border-b-0 md:border-r">
+          <div className="flex items-center justify-between">
+            <span className="text-2xl">{gift.house === "YASMIN" ? "🦅" : "🦁"}</span>
+            <span className="text-xs uppercase tracking-[0.22em] text-amber-100/55">
+              {gift.priority}
+            </span>
           </div>
+          <div className="glyph-panel flex flex-1 items-center justify-center text-4xl text-amber-50">
+            {gift.timeframe === "SHORT" ? "✦" : gift.timeframe === "MEDIUM" ? "❖" : "✧"}
+          </div>
+          <p className="text-[0.65rem] uppercase tracking-[0.24em] text-amber-100/60">
+            slot vazio
+          </p>
+        </div>
 
-          <div className="flex min-w-0 flex-col justify-between gap-3">
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2">
-                <span className="rounded-full border border-white/12 bg-black/35 px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
-                  {timeframeShortLabels[gift.timeframe]}
-                </span>
-                <span className="rounded-full border border-white/12 bg-black/35 px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
-                  {gift.owner === "HER" ? "Yasmin" : "Pedro"}
-                </span>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-amber-100/70">
-                  {gift.status === "RECEIVED" ? "Desejo realizado" : "Desejo em curso"}
-                </p>
-                <h3 className="mt-1 font-[family-name:var(--font-display)] text-3xl leading-tight text-amber-50">
-                  {gift.name}
-                </h3>
-              </div>
-              <p className="text-sm leading-6 text-amber-100/76">{gift.description}</p>
-            </div>
-
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-base font-medium text-amber-50">{currency(gift.price)}</p>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-amber-100/70">
-                prioridade {gift.priority}
+        <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
+                {timeframeShortLabels[gift.timeframe]}
+              </span>
+              <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
+                {gift.owner === "HER" ? "Yasmin" : "Pedro"}
               </span>
             </div>
-
-            <div className="flex flex-wrap gap-2">
-              <ActionButton onClick={() => onEdit(gift)}>Editar</ActionButton>
-              <ActionButton onClick={() => onReceive(gift.id)}>
-                Marcar como recebido
-              </ActionButton>
-              <ActionButton onClick={() => onDelete(gift.id)}>Excluir</ActionButton>
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-amber-100/70">
+                {gift.status === "RECEIVED" ? "Desejo realizado" : "Desejo em curso"}
+              </p>
+              <h3 className="mt-1 font-[family-name:var(--font-display)] text-3xl leading-tight text-amber-50">
+                {gift.name}
+              </h3>
             </div>
-
-            <a
-              href={gift.productUrl}
-              className="inline-flex items-center gap-2 text-sm text-amber-200 transition hover:text-amber-100"
-            >
-              Ver presente
-              <span aria-hidden>↗</span>
-            </a>
+            <p className="text-sm leading-6 text-amber-100/76">{gift.description}</p>
           </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-base font-medium text-amber-50">{currency(gift.price)}</p>
+            <span className="castle-chip px-3 py-1 text-xs uppercase tracking-[0.2em] text-amber-100/70">
+              prioridade {gift.priority}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <ActionButton onClick={() => onEdit(gift)}>Editar</ActionButton>
+            <ActionButton onClick={() => onReceive(gift.id)}>
+              Marcar como recebido
+            </ActionButton>
+            <ActionButton onClick={() => onDelete(gift.id)}>Excluir</ActionButton>
+          </div>
+
+          <a
+            href={gift.productUrl}
+            className="inline-flex items-center gap-2 text-sm text-amber-200 transition hover:text-amber-100"
+          >
+            Ver presente
+            <span aria-hidden>↗</span>
+          </a>
         </div>
       </div>
     </article>
@@ -1421,7 +1555,7 @@ function ActionButton({
     <button
       type="button"
       onClick={onClick}
-      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.18em] text-amber-100/78 transition hover:border-amber-200/25 hover:bg-amber-200/10 hover:text-amber-50"
+      className="castle-chip px-3 py-2 text-xs uppercase tracking-[0.18em] text-amber-100/78 transition hover:bg-amber-200/10 hover:text-amber-50"
     >
       {children}
     </button>
@@ -1430,7 +1564,7 @@ function ActionButton({
 
 function EmptyState({ title }: { title: string }) {
   return (
-    <div className="rounded-[1.75rem] border border-dashed border-white/12 bg-white/4 px-6 py-12 text-center text-amber-100/70">
+    <div className="castle-panel-soft px-6 py-12 text-center text-amber-100/70">
       <p className="font-[family-name:var(--font-display)] text-3xl text-amber-50">
         {title}
       </p>
@@ -1454,250 +1588,13 @@ function FilterPill({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-4 py-2 text-sm transition ${
+      className={`castle-chip px-4 py-2 text-sm transition ${
         active
-          ? "border-amber-300/40 bg-amber-200/15 text-amber-50 shadow-[0_0_0_1px_rgba(255,214,153,0.2)]"
-          : "border-white/10 bg-white/5 text-amber-100/72 hover:bg-white/10"
+          ? "bg-amber-200/15 text-amber-50 shadow-[0_0_0_1px_rgba(255,214,153,0.2)]"
+          : "text-amber-100/72 hover:bg-white/10"
       }`}
     >
       {label}
     </button>
-  );
-}
-
-function MagicalGlyph({ type }: { type: Exclude<GiftTimeframe, "ANY"> }) {
-  const palette = {
-    SHORT: ["#2dd4bf", "#60a5fa"],
-    MEDIUM: ["#f59e0b", "#fbbf24"],
-    LONG: ["#fb7185", "#c084fc"],
-  }[type];
-
-  return (
-    <svg viewBox="0 0 320 220" className="h-full w-full" aria-hidden="true">
-      <defs>
-        <linearGradient id={`glyph-${type}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={palette[0]} />
-          <stop offset="100%" stopColor={palette[1]} />
-        </linearGradient>
-      </defs>
-      <rect width="320" height="220" fill="rgba(255,255,255,0.03)" />
-      <circle cx="92" cy="100" r="58" fill={`url(#glyph-${type})`} opacity="0.35" />
-      <path
-        d="M178 54l16 32 35 5-25 24 6 34-32-17-32 17 6-34-25-24 35-5 16-32z"
-        fill={`url(#glyph-${type})`}
-        opacity="0.45"
-      />
-      <circle cx="232" cy="154" r="26" fill={`url(#glyph-${type})`} opacity="0.32" />
-    </svg>
-  );
-}
-
-function WizardCard({ item }: { item: WizardGalleryItem }) {
-  return (
-    <article className="rounded-[1.75rem] border border-white/10 bg-[#121325]/90 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.35)]">
-      <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-3">
-        <item.icon />
-      </div>
-      <div className="mt-3">
-        <p className="text-xs uppercase tracking-[0.26em] text-amber-100/55">{item.kind}</p>
-        <h3 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
-          {item.name}
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-amber-100/70">{item.description}</p>
-      </div>
-    </article>
-  );
-}
-
-type WizardGalleryItem = {
-  kind: string;
-  name: string;
-  description: string;
-  icon: () => JSX.Element;
-};
-
-const wizardGallery: WizardGalleryItem[] = [
-  {
-    kind: "Personagem",
-    name: "Harry",
-    description: "Óculos, cicatriz e coragem desenhados de forma original.",
-    icon: HarryGlyph,
-  },
-  {
-    kind: "Personagem",
-    name: "Hermione",
-    description: "Livro, brilho e postura de quem sempre encontrou a resposta.",
-    icon: HermioneGlyph,
-  },
-  {
-    kind: "Item",
-    name: "Varinha",
-    description: "Um feixe de luz, madeira e faísca de encantamento.",
-    icon: WandGlyph,
-  },
-  {
-    kind: "Lugar",
-    name: "Hogwarts",
-    description: "Torre, lua e janelas acesas em noite de aventura.",
-    icon: CastleGlyph,
-  },
-  {
-    kind: "Personagem",
-    name: "Dobby",
-    description: "Olhar esperto e orelhas grandes em silhueta simpática.",
-    icon: DobbyGlyph,
-  },
-  {
-    kind: "Personagem",
-    name: "Dumbledore",
-    description: "Barba longa, estrela e calma de diretor lendário.",
-    icon: DumbledoreGlyph,
-  },
-  {
-    kind: "Bicho",
-    name: "Coruja",
-    description: "Voadora, atenta e mensageira do cofre.",
-    icon: OwlGlyph,
-  },
-  {
-    kind: "Bicho",
-    name: "Hagrid",
-    description: "Grande presença, coração generoso e lanterna acesa.",
-    icon: HagridGlyph,
-  },
-];
-
-function HarryGlyph() {
-  return <WizardPortrait variant="harry" />;
-}
-
-function HermioneGlyph() {
-  return <WizardPortrait variant="hermione" />;
-}
-
-function WandGlyph() {
-  return <WizardObject variant="wand" />;
-}
-
-function CastleGlyph() {
-  return <WizardObject variant="castle" />;
-}
-
-function DobbyGlyph() {
-  return <WizardPortrait variant="dobby" />;
-}
-
-function DumbledoreGlyph() {
-  return <WizardPortrait variant="dumbledore" />;
-}
-
-function OwlGlyph() {
-  return <WizardObject variant="owl" />;
-}
-
-function HagridGlyph() {
-  return <WizardPortrait variant="hagrid" />;
-}
-
-function WizardPortrait({ variant }: { variant: "harry" | "hermione" | "dobby" | "dumbledore" | "hagrid" }) {
-  const accent =
-    variant === "hermione"
-      ? "#60a5fa"
-      : variant === "dobby"
-        ? "#f8b4d9"
-        : variant === "dumbledore"
-          ? "#fbbf24"
-          : variant === "hagrid"
-            ? "#c084fc"
-            : "#f59e0b";
-
-  return (
-    <svg viewBox="0 0 220 220" className="h-40 w-full" aria-hidden="true">
-      <defs>
-        <linearGradient id={`portrait-${variant}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={accent} stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.18" />
-        </linearGradient>
-      </defs>
-      <rect width="220" height="220" rx="24" fill="rgba(255,255,255,0.03)" />
-      <circle cx="110" cy="76" r="32" fill={`url(#portrait-${variant})`} />
-      <path
-        d="M58 190c8-36 28-56 52-56s44 20 52 56"
-        fill={`url(#portrait-${variant})`}
-        opacity="0.7"
-      />
-      {variant === "harry" ? (
-        <>
-          <circle cx="95" cy="74" r="6" fill="#0f172a" />
-          <circle cx="125" cy="74" r="6" fill="#0f172a" />
-          <rect x="100" y="73" width="20" height="2" rx="1" fill="#0f172a" />
-          <path d="M110 30l8 18-14 6 10 8" fill="none" stroke={accent} strokeWidth="4" strokeLinecap="round" />
-        </>
-      ) : null}
-      {variant === "hermione" ? (
-        <>
-          <path d="M78 58c14-20 50-20 64 0" fill="none" stroke="#0f172a" strokeWidth="5" strokeLinecap="round" />
-          <path d="M88 92c10 12 34 12 44 0" fill="none" stroke="#0f172a" strokeWidth="5" strokeLinecap="round" />
-          <path d="M84 40h52" stroke="#0f172a" strokeWidth="5" strokeLinecap="round" />
-          <path d="M150 120l16 20" stroke={accent} strokeWidth="6" strokeLinecap="round" />
-        </>
-      ) : null}
-      {variant === "dobby" ? (
-        <>
-          <path d="M70 80l-18-24 14 4 10 16" fill={accent} opacity="0.8" />
-          <path d="M150 80l18-24-14 4-10 16" fill={accent} opacity="0.8" />
-          <circle cx="110" cy="84" r="6" fill="#0f172a" />
-          <circle cx="92" cy="80" r="5" fill="#0f172a" />
-          <circle cx="128" cy="80" r="5" fill="#0f172a" />
-        </>
-      ) : null}
-      {variant === "dumbledore" ? (
-        <>
-          <path d="M92 70c8-18 28-18 36 0" fill="none" stroke="#0f172a" strokeWidth="5" />
-          <path d="M78 122c18 34 46 34 64 0" fill="none" stroke="#f8fafc" strokeWidth="10" strokeLinecap="round" />
-          <circle cx="110" cy="50" r="6" fill={accent} />
-        </>
-      ) : null}
-      {variant === "hagrid" ? (
-        <>
-          <path d="M78 68c10-16 54-16 64 0" fill="none" stroke="#0f172a" strokeWidth="5" />
-          <path d="M84 122c14 26 38 26 52 0" fill="none" stroke="#f8fafc" strokeWidth="8" strokeLinecap="round" />
-          <circle cx="72" cy="130" r="8" fill={accent} opacity="0.6" />
-        </>
-      ) : null}
-      <circle cx="110" cy="76" r="32" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function WizardObject({ variant }: { variant: "wand" | "castle" | "owl" }) {
-  return (
-    <svg viewBox="0 0 220 220" className="h-40 w-full" aria-hidden="true">
-      <rect width="220" height="220" rx="24" fill="rgba(255,255,255,0.03)" />
-      {variant === "wand" ? (
-        <>
-          <path d="M52 168l116-116" stroke="#fbbf24" strokeWidth="12" strokeLinecap="round" />
-          <path d="M136 48l28-12-12 28" fill="none" stroke="#f8fafc" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="54" cy="166" r="10" fill="#f59e0b" opacity="0.6" />
-        </>
-      ) : null}
-      {variant === "castle" ? (
-        <>
-          <path d="M58 172h104v-54H58z" fill="#3b82f6" opacity="0.45" />
-          <path d="M72 118V78l22 20 22-20 22 20 22-20v40" fill="#60a5fa" opacity="0.55" />
-          <path d="M96 172v-38h28v38" fill="#dbeafe" opacity="0.6" />
-          <circle cx="160" cy="56" r="20" fill="#fbbf24" opacity="0.5" />
-        </>
-      ) : null}
-      {variant === "owl" ? (
-        <>
-          <ellipse cx="110" cy="118" rx="42" ry="36" fill="#f59e0b" opacity="0.35" />
-          <circle cx="92" cy="112" r="8" fill="#0f172a" />
-          <circle cx="128" cy="112" r="8" fill="#0f172a" />
-          <path d="M110 120l-8 12h16z" fill="#fbbf24" />
-          <path d="M72 74l18 18M148 74l-18 18" stroke="#f8fafc" strokeWidth="4" strokeLinecap="round" />
-        </>
-      ) : null}
-    </svg>
   );
 }

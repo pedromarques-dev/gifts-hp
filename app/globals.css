@@ -29,9 +29,10 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(119, 92, 255, 0.16), transparent 26%),
-    radial-gradient(circle at 20% 20%, rgba(255, 196, 110, 0.08), transparent 20%),
-    linear-gradient(180deg, #0c1020 0%, #070910 100%);
+    radial-gradient(circle at 18% 12%, rgba(255, 210, 122, 0.14), transparent 20%),
+    radial-gradient(circle at 82% 8%, rgba(57, 104, 215, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(12, 84, 86, 0.18), transparent 30%),
+    linear-gradient(180deg, #070910 0%, #0c0f18 40%, #080a12 100%);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
 }
@@ -93,4 +94,47 @@ select {
 .shimmer {
   background-size: 200% 200%;
   animation: shimmer 14s linear infinite;
+}
+
+.castle-panel {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    linear-gradient(180deg, rgba(14, 18, 32, 0.96), rgba(9, 11, 18, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+}
+
+.castle-panel-soft {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+    linear-gradient(180deg, rgba(18, 21, 40, 0.92), rgba(10, 12, 20, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 14px 44px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.castle-chip {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--foreground);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.castle-etch {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+.glyph-panel {
+  background: linear-gradient(180deg, rgba(255, 214, 122, 0.14), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 214, 122, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
