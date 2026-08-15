@@ -110,248 +110,7 @@ const houseBadgeCrests: Record<string, string> = {
   HUFFLEPUFF: "/houses/hufflepuff.png",
 };
 
-const initialGifts: Gift[] = [
-  {
-    id: "yasmin-1",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Pijama cirúrgico azul",
-    description: "Pra ficar confortável em plantão, casa ou uma noite de descanso real.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 5,
-    timeframe: "SHORT",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "yasmin-2",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Macacão veterinário verde ou azul",
-    description: "O uniforme perfeito para um dia corrido sem perder estilo.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 4,
-    timeframe: "SHORT",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "yasmin-3",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Capa pra iPad",
-    description: "Proteção elegante para o tablet acompanhar a rotina sem drama.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1533746128373-7d9c0bbf2c0c?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 3,
-    timeframe: "SHORT",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "yasmin-4",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Tênis pra sair",
-    description: "Puma ou Nike, para andar leve e sair bonita sem esforço.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 4,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "yasmin-5",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Sandália arrumadinha",
-    description: "Pra sair com conforto, sem cair no havaianas de sempre.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 3,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "yasmin-6",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Bolsa média pra sair",
-    description: "O tamanho certo para caber tudo sem virar mala de viagem.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 4,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "yasmin-7",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Make de Harry Potter",
-    description: "Um kit temático, brilhante e bem feitinho para ocasiões especiais.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 3,
-    timeframe: "LONG",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "yasmin-8",
-    house: "YASMIN",
-    owner: "HER",
-    name: "Anel com pedrinhas",
-    description: "Pra quando o prazo for o que quiser, mas a vontade for agora.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 5,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "yasmin",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-1",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Regata pra treinar",
-    description: "Regata mais larguinha no ombro, para treino sem aperto.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 4,
-    timeframe: "SHORT",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-2",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Short de linho pra sair",
-    description: "G ou 42, com folga, leveza e cara de roupa que abraça o calor.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 5,
-    timeframe: "SHORT",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-3",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Cuecas novas",
-    description: "Para renovar o básico sem drama. Tamanho G.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 3,
-    timeframe: "SHORT",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-4",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Óculos de sol novo",
-    description: "Quadrado ou hexagonal, com presença de personagem principal.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 4,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-5",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Camisa social nova",
-    description: "Tamanho G, boa de caimento e pronta pra ocasião séria.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 4,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-6",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Calça jeans escura ou preta",
-    description: "Tamanho 42, versátil e com cara de peça coringa.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 5,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-7",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Relógio digital",
-    description: "Pra dar o toque final de item importante e funcional.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 4,
-    timeframe: "MEDIUM",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-  {
-    id: "pedro-8",
-    house: "PEDRO",
-    owner: "ME",
-    name: "Monitor fino para o MacBook",
-    description: "Complemento leve, bem fino e perfeito para mesa de trabalho.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1520544814233-1f6b0c5d0b88?auto=format&fit=crop&w=1200&q=80",
-    productUrl: "#",
-    priority: 5,
-    timeframe: "LONG",
-    status: "WANTED",
-    createdBy: "pedro",
-    createdAt: "2026-08-10",
-  },
-];
+const initialGifts: Gift[] = [];
 
 const levels = [
   "Aprendiz do Armário",
@@ -539,35 +298,30 @@ export function MagicalHome() {
 
   const yasminStats = houseStats("YASMIN");
   const pedroStats = houseStats("PEDRO");
-  const sortingCards = [
+  const houseSpotlights = [
     {
       name: "Grifinória",
       crest: houseBadgeCrests.GRYFFINDOR,
-      percent: Math.max(24, Math.round((pedroStats.xp / Math.max(combinedXp, 1)) * 100)),
-      hue: "from-red-500/55 to-orange-300/20",
+      note: "coragem, impulso e faísca",
+      tint: "from-red-500/35 via-orange-300/18 to-transparent",
     },
     {
       name: "Corvinal",
       crest: houseBadgeCrests.RAVENCLAW,
-      percent: Math.max(24, Math.round((yasminStats.xp / Math.max(combinedXp, 1)) * 100)),
-      hue: "from-sky-400/55 to-cyan-300/20",
+      note: "mente afiada e detalhe",
+      tint: "from-sky-400/30 via-cyan-300/18 to-transparent",
     },
     {
       name: "Lufa-Lufa",
       crest: houseBadgeCrests.HUFFLEPUFF,
-      percent: Math.max(
-        14,
-        100 -
-          Math.round((pedroStats.xp / Math.max(combinedXp, 1)) * 100) -
-          Math.round((yasminStats.xp / Math.max(combinedXp, 1)) * 100),
-      ),
-      hue: "from-yellow-300/50 to-amber-200/15",
+      note: "cuidado, constância e aconchego",
+      tint: "from-yellow-300/28 via-amber-200/16 to-transparent",
     },
     {
       name: "Sonserina",
       crest: houseBadgeCrests.SLYTHERIN,
-      percent: Math.max(16, Math.round(totalWanted * 2.8)),
-      hue: "from-emerald-400/55 to-green-300/20",
+      note: "astúcia, foco e presença",
+      tint: "from-emerald-400/32 via-green-300/18 to-transparent",
     },
   ];
 
@@ -753,7 +507,7 @@ export function MagicalHome() {
                 </span>
               </div>
 
-              <HogwartsMural cards={sortingCards} />
+              <HogwartsMural cards={houseSpotlights} />
 
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <HeroStat label="Nível" value={`Nível ${overallLevel.level}`} />
@@ -866,7 +620,7 @@ export function MagicalHome() {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {[
                 {
                   key: "ALL",
@@ -874,12 +628,12 @@ export function MagicalHome() {
                   sub: "ver todos os presentes",
                   crest: "https://commons.wikimedia.org/wiki/Special:FilePath/Coat%20of%20arms%20of%20Hogwarts.svg",
                 },
-                {
-                  key: "YASMIN",
-                  label: "Yasmin / Corvinal",
-                  sub: "vitrine da bruxa",
-                  crest: houses.YASMIN.crestUrl,
-                },
+                  {
+                    key: "YASMIN",
+                    label: "Yasmin / Sonserina",
+                    sub: "vitrine da bruxa",
+                    crest: houses.YASMIN.crestUrl,
+                  },
                 {
                   key: "PEDRO",
                   label: "Pedro / Grifinória",
@@ -1637,7 +1391,7 @@ function HeroStat({
 function HogwartsMural({
   cards,
 }: {
-  cards: Array<{ name: string; crest: string; percent: number; hue: string }>;
+  cards: Array<{ name: string; crest: string; note: string; tint: string }>;
 }) {
   return (
     <div className="relative mt-4 overflow-hidden border border-white/10 bg-[linear-gradient(180deg,rgba(9,12,24,0.98),rgba(10,12,18,0.98))]">
@@ -1645,71 +1399,122 @@ function HogwartsMural({
       <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(86,66,160,0.2),transparent)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,transparent,rgba(7,8,14,0.94))]" />
 
-      <div className="relative p-4 sm:p-5">
+      <div className="relative p-4 sm:p-5 lg:p-6">
         <div className="flex items-center justify-center">
           <span className="castle-chip px-4 py-2 text-[0.72rem] uppercase tracking-[0.3em] text-amber-100/80">
             Sorted today
           </span>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {cards.map((card) => (
-            <article key={card.name} className={`castle-panel-soft overflow-hidden border-t-4 bg-[#121325]/88 ${card.hue}`}>
-              <div className="flex items-center justify-between px-4 py-3">
-                <img src={card.crest} alt="" aria-hidden="true" className="h-14 w-14 object-contain" />
-                <span className="text-xs uppercase tracking-[0.22em] text-amber-100/55">house</span>
-              </div>
-              <div className="px-4 pb-4">
-                <h3 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
-                  {card.name}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-amber-100/72">
-                  {card.percent}% da energia do cofre hoje
-                </p>
-                <div className="mt-3 h-2 bg-white/8">
-                  <div
-                    className="h-full bg-gradient-to-r from-amber-300 via-orange-300 to-amber-100"
-                    style={{ width: `${Math.min(100, card.percent)}%` }}
-                  />
+        <div className="mt-5 grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {cards.map((card) => (
+              <article
+                key={card.name}
+                className={`castle-panel-soft overflow-hidden border-t-4 bg-[#121325]/88 ${card.tint}`}
+              >
+                <div className="flex items-start justify-between gap-4 px-4 py-4">
+                  <div className="space-y-3">
+                    <img src={card.crest} alt="" aria-hidden="true" className="h-16 w-16 object-contain" />
+                    <div>
+                      <p className="text-[0.68rem] uppercase tracking-[0.24em] text-amber-100/55">
+                        Casa
+                      </p>
+                      <h3 className="font-[family-name:var(--font-display)] text-3xl text-amber-50">
+                        {card.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <span className="text-[0.72rem] uppercase tracking-[0.22em] text-amber-100/55">
+                    Hogwarts
+                  </span>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
-              Hogwarts notes
-            </p>
-            <h3 className="font-[family-name:var(--font-display)] text-4xl leading-none text-amber-50 sm:text-5xl">
-              What&apos;s your Hogwarts house?
-            </h3>
-            <p className="max-w-xl text-sm leading-7 text-amber-100/72 sm:text-base">
-              O clima do castelo agora entra no site como uma vitrine editorial: placas,
-              brasões, brilho e espaço para a história crescer aos poucos.
-            </p>
+                <div className="px-4 pb-4">
+                  <p className="max-w-sm text-sm leading-6 text-amber-100/72">
+                    {card.note}
+                  </p>
+                </div>
+              </article>
+            ))}
           </div>
 
-          <div className="castle-panel-soft p-4">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="castle-panel-soft overflow-hidden p-5 lg:p-6">
+            <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
+                  Ala dos personagens
+                </p>
+                <h3 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                  Harry, Rony e Hermione
+                </h3>
+              </div>
+              <span className="castle-chip px-3 py-1 text-[0.72rem] uppercase tracking-[0.22em] text-amber-100/75">
+                Hogwarts
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-3">
               {[
-                { label: "Grifinória", icon: "🦁", tone: "text-red-300" },
-                { label: "Corvinal", icon: "🦅", tone: "text-sky-200" },
-                { label: "Lufa-Lufa", icon: "🦡", tone: "text-yellow-100" },
-                { label: "Sonserina", icon: "🐍", tone: "text-emerald-200" },
-              ].map((house) => (
-                <div key={house.label} className="castle-chip flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.2em] text-amber-50">
-                  <span className={`text-sm ${house.tone}`}>{house.icon}</span>
-                  <span>{house.label}</span>
-                </div>
+                {
+                  title: "Harry",
+                  icon: "⚡",
+                  text: "o impulso do trio",
+                  tone: "from-amber-300/20 via-orange-300/10 to-transparent",
+                },
+                {
+                  title: "Rony",
+                  icon: "♟",
+                  text: "o coração e o humor",
+                  tone: "from-rose-300/18 via-violet-300/10 to-transparent",
+                },
+                {
+                  title: "Hermione",
+                  icon: "📚",
+                  text: "a estratégia que costura tudo",
+                  tone: "from-sky-300/20 via-cyan-300/10 to-transparent",
+                },
+              ].map((character) => (
+                <article
+                  key={character.title}
+                  className={`castle-panel-soft overflow-hidden bg-[#121325]/82 p-4 ${character.tone}`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[0.68rem] uppercase tracking-[0.24em] text-amber-100/55">
+                        Bruxo do salão
+                      </p>
+                      <h4 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                        {character.title}
+                      </h4>
+                    </div>
+                    <span className="text-2xl">{character.icon}</span>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-amber-100/72">{character.text}</p>
+                </article>
               ))}
             </div>
-            <div className="mt-3 border-t border-white/10 pt-3 text-sm leading-6 text-amber-100/70">
+
+            <div className="mt-4 border-t border-white/10 pt-4 text-sm leading-6 text-amber-100/70">
               Harry, Rony e Hermione entram como eco de fundo, enquanto Pedro e Yasmin ganham
               a própria casa no cofre.
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {cards.map((card) => (
+            <article key={card.name} className="castle-panel-soft flex items-center gap-3 px-4 py-4">
+              <img src={card.crest} alt="" aria-hidden="true" className="h-14 w-14 object-contain" />
+              <div>
+                <p className="text-[0.68rem] uppercase tracking-[0.22em] text-amber-100/55">
+                  Casa
+                </p>
+                <h3 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                  {card.name}
+                </h3>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </div>
