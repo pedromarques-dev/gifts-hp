@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent, ReactNode } from "react";
+import type { Dispatch, FormEvent, ReactNode, SetStateAction } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type HouseId = "YASMIN" | "PEDRO";
@@ -45,6 +45,7 @@ type HouseConfig = {
   schoolHouse: string;
   symbol: string;
   icon: string;
+  crestUrl: string;
   accent: string;
   glow: string;
   crest: string;
@@ -54,13 +55,14 @@ const houses: Record<HouseId, HouseConfig> = {
   YASMIN: {
     id: "YASMIN",
     label: "Yasmin",
-    subtitle: "Bruxa da Corvinal, com olho fino para detalhe e elegância.",
+    subtitle: "Bruxa da Sonserina, com olhar esperto, presença e estratégia.",
     pronoun: "ela",
-    schoolHouse: "Corvinal",
-    symbol: "🦅",
+    schoolHouse: "Sonserina",
+    symbol: "🐍",
     icon: "✦",
-    accent: "from-emerald-300 via-cyan-300 to-sky-200",
-    glow: "rgba(87, 234, 208, 0.22)",
+    crestUrl: "/houses/slytherin.png",
+    accent: "from-emerald-400 via-lime-300 to-cyan-200",
+    glow: "rgba(90, 190, 120, 0.22)",
     crest: "Y",
   },
   PEDRO: {
@@ -71,6 +73,7 @@ const houses: Record<HouseId, HouseConfig> = {
     schoolHouse: "Grifinória",
     symbol: "🦁",
     icon: "⚡",
+    crestUrl: "/houses/gryffindor.png",
     accent: "from-amber-300 via-orange-300 to-rose-200",
     glow: "rgba(250, 190, 87, 0.22)",
     crest: "P",
@@ -96,9 +99,16 @@ const ownerLabels: Record<GiftOwner, string> = {
 
 const houseFilters: Array<{ label: string; value: HouseId | "ALL" }> = [
   { label: "Mural completo", value: "ALL" },
-  { label: "Yasmin / Corvinal", value: "YASMIN" },
+  { label: "Yasmin / Sonserina", value: "YASMIN" },
   { label: "Pedro / Grifinória", value: "PEDRO" },
 ];
+
+const houseBadgeCrests: Record<string, string> = {
+  GRYFFINDOR: "/houses/gryffindor.png",
+  RAVENCLAW: "/houses/ravenclaw.png",
+  SLYTHERIN: "/houses/slytherin.png",
+  HUFFLEPUFF: "/houses/hufflepuff.png",
+};
 
 const initialGifts: Gift[] = [
   {
@@ -368,6 +378,7 @@ function formatDate(date: string) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "UTC",
   }).format(new Date(`${date}T12:00:00`));
 }
 
@@ -462,7 +473,9 @@ export function MagicalHome() {
   const [selectedHouse, setSelectedHouse] = useState<HouseId>("YASMIN");
   const [soundOn, setSoundOn] = useState(false);
   const [owlAlert, setOwlAlert] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [greeting, setGreeting] = useState("Bem-vindo");
   const [formState, setFormState] = useState<GiftFormState>({
     name: "",
     description: "",
@@ -483,6 +496,13 @@ export function MagicalHome() {
     const timer = window.setTimeout(() => setToast(null), 3600);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    const currentHour = new Date().getHours();
+    setGreeting(
+      currentHour >= 18 ? "Boa noite" : currentHour >= 12 ? "Boa tarde" : "Bom dia",
+    );
+  }, []);
 
   const filteredGifts = useMemo(() => {
     return gifts.filter((gift) => {
@@ -519,13 +539,40 @@ export function MagicalHome() {
 
   const yasminStats = houseStats("YASMIN");
   const pedroStats = houseStats("PEDRO");
+  const sortingCards = [
+    {
+      name: "Grifinória",
+      crest: houseBadgeCrests.GRYFFINDOR,
+      percent: Math.max(24, Math.round((pedroStats.xp / Math.max(combinedXp, 1)) * 100)),
+      hue: "from-red-500/55 to-orange-300/20",
+    },
+    {
+      name: "Corvinal",
+      crest: houseBadgeCrests.RAVENCLAW,
+      percent: Math.max(24, Math.round((yasminStats.xp / Math.max(combinedXp, 1)) * 100)),
+      hue: "from-sky-400/55 to-cyan-300/20",
+    },
+    {
+      name: "Lufa-Lufa",
+      crest: houseBadgeCrests.HUFFLEPUFF,
+      percent: Math.max(
+        14,
+        100 -
+          Math.round((pedroStats.xp / Math.max(combinedXp, 1)) * 100) -
+          Math.round((yasminStats.xp / Math.max(combinedXp, 1)) * 100),
+      ),
+      hue: "from-yellow-300/50 to-amber-200/15",
+    },
+    {
+      name: "Sonserina",
+      crest: houseBadgeCrests.SLYTHERIN,
+      percent: Math.max(16, Math.round(totalWanted * 2.8)),
+      hue: "from-emerald-400/55 to-green-300/20",
+    },
+  ];
 
   const receivedGifts = gifts.filter((gift) => gift.status === "RECEIVED");
   const activeGifts = filteredGifts.filter((gift) => gift.status === "WANTED");
-
-  const currentHour = new Date().getHours();
-  const greeting =
-    currentHour >= 18 ? "Boa noite" : currentHour >= 12 ? "Boa tarde" : "Bom dia";
 
   function resetForm(nextHouse: HouseId = selectedHouse) {
     setEditingGiftId(null);
@@ -541,6 +588,12 @@ export function MagicalHome() {
       owner: nextHouse === "YASMIN" ? "HER" : "ME",
       house: nextHouse,
     });
+  }
+
+  function openComposer(nextHouse: HouseId = selectedHouse) {
+    setSelectedHouse(nextHouse);
+    resetForm(nextHouse);
+    setComposerOpen(true);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -572,6 +625,7 @@ export function MagicalHome() {
     });
 
     setToast(editingGiftId ? "Desejo alterado com sucesso." : "Novo desejo adicionado ao cofre.");
+    setComposerOpen(false);
     resetForm(nextGift.house);
   }
 
@@ -589,7 +643,7 @@ export function MagicalHome() {
       owner: gift.owner,
       house: gift.house,
     });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setComposerOpen(true);
   }
 
   function deleteGift(id: string) {
@@ -666,13 +720,13 @@ export function MagicalHome() {
 
               <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
                 {[
-                  { label: "Grifinória", icon: "🦁", tone: "text-amber-200" },
-                  { label: "Sonserina", icon: "🐍", tone: "text-emerald-200" },
-                  { label: "Corvinal", icon: "🦅", tone: "text-sky-200" },
-                  { label: "Lufa-Lufa", icon: "🦡", tone: "text-yellow-100" },
+                  { label: "Grifinória", crest: houseBadgeCrests.GRYFFINDOR, tone: "text-amber-200" },
+                  { label: "Sonserina", crest: houseBadgeCrests.SLYTHERIN, tone: "text-emerald-200" },
+                  { label: "Corvinal", crest: houseBadgeCrests.RAVENCLAW, tone: "text-sky-200" },
+                  { label: "Lufa-Lufa", crest: houseBadgeCrests.HUFFLEPUFF, tone: "text-yellow-100" },
                 ].map((house) => (
                   <div key={house.label} className="castle-panel-soft flex items-center gap-3 px-4 py-3">
-                    <span className={`text-2xl ${house.tone}`}>{house.icon}</span>
+                    <img src={house.crest} alt="" aria-hidden="true" className="h-10 w-10 object-contain" />
                     <div>
                       <p className="text-[0.72rem] uppercase tracking-[0.24em] text-amber-100/55">Casa</p>
                       <p className="font-[family-name:var(--font-display)] text-xl text-amber-50">
@@ -699,7 +753,7 @@ export function MagicalHome() {
                 </span>
               </div>
 
-              <HogwartsMural />
+              <HogwartsMural cards={sortingCards} />
 
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <HeroStat label="Nível" value={`Nível ${overallLevel.level}`} />
@@ -717,86 +771,202 @@ export function MagicalHome() {
           ) : null}
         </header>
 
-        <section className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
-          <div className="space-y-6">
-            <div className="castle-panel p-4 sm:p-5">
-              <div className="flex flex-col gap-5">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-amber-200/60">
-                      Filtros de visão
-                    </p>
-                    <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
-                      Escolha a lente do mapa
-                    </h2>
-                  </div>
+        <section className="castle-panel p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.28em] text-amber-200/60">
+                Filtros do castelo
+              </p>
+              <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                Uma faixa só para organizar o mapa
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => openComposer(view === "ALL" ? selectedHouse : view)}
+              className="castle-chip inline-flex items-center gap-2 px-4 py-2 text-sm uppercase tracking-[0.24em] text-amber-50 transition hover:bg-amber-200/10"
+            >
+              <span>+</span>
+              Adicionar presente
+            </button>
+          </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {(["ANY", "SHORT", "MEDIUM", "LONG"] as const).map((value) => (
-                      <FilterPill
-                        key={value}
-                        active={timeframeFilter === value}
-                        label={
-                          value === "ANY"
-                            ? "Todos"
-                            : timeframeShortLabels[value]
-                        }
-                        onClick={() => setTimeframeFilter(value)}
-                      />
-                    ))}
-                  </div>
-                </div>
+          <div className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  {
+                    key: "ANY",
+                    icon: "🗺️",
+                    title: "Tudo",
+                    subtitle: "mural completo",
+                  },
+                  {
+                    key: "SHORT",
+                    icon: "🦉",
+                    title: "Curto prazo",
+                    subtitle: "coruja expressa",
+                  },
+                  {
+                    key: "MEDIUM",
+                    icon: "✨",
+                    title: "Médio prazo",
+                    subtitle: "semestre em Hogwarts",
+                  },
+                  {
+                    key: "LONG",
+                    icon: "🔮",
+                    title: "Longo prazo",
+                    subtitle: "profecias",
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setTimeframeFilter(item.key as GiftTimeframe | "ANY")}
+                    className={`castle-panel-soft flex items-center gap-3 px-4 py-4 text-left transition hover:-translate-y-0.5 ${
+                      timeframeFilter === item.key
+                        ? "ring-1 ring-amber-200/35"
+                        : ""
+                    }`}
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-white/5 text-2xl">
+                      {item.icon}
+                    </span>
+                    <div>
+                      <p className="font-[family-name:var(--font-display)] text-xl text-amber-50">
+                        {item.title}
+                      </p>
+                      <p className="text-xs uppercase tracking-[0.22em] text-amber-100/55">
+                        {item.subtitle}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {(["ANY", "WANTED", "RECEIVED"] as const).map((value) => (
-                    <FilterPill
-                      key={value}
-                      active={statusFilter === value}
-                      label={
-                        value === "ANY"
-                          ? "Tudo"
-                          : value === "WANTED"
-                            ? "Só desejos"
-                            : "Realizados"
-                      }
-                      onClick={() => setStatusFilter(value)}
-                    />
-                  ))}
-                </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  { key: "ANY", icon: "⚪", label: "Tudo" },
+                  { key: "WANTED", icon: "📜", label: "Só desejos" },
+                  { key: "RECEIVED", icon: "🎁", label: "Realizados" },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setStatusFilter(item.key as GiftStatus | "ANY")}
+                    className={`castle-chip flex items-center justify-center gap-2 px-4 py-3 text-sm uppercase tracking-[0.2em] transition ${
+                      statusFilter === item.key ? "bg-amber-200/12 text-amber-50" : "text-amber-100/75"
+                    }`}
+                  >
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {view === "ALL" ? (
-              <div className="grid gap-5 lg:grid-cols-2">
-                <HouseColumn
-                  house={houses.YASMIN}
-                  stats={yasminStats}
-                  gifts={filteredGifts.filter((gift) => gift.house === "YASMIN")}
-                  onEdit={editGift}
-                  onDelete={deleteGift}
-                  onReceive={markAsReceived}
-                />
-                <HouseColumn
-                  house={houses.PEDRO}
-                  stats={pedroStats}
-                  gifts={filteredGifts.filter((gift) => gift.house === "PEDRO")}
-                  onEdit={editGift}
-                  onDelete={deleteGift}
-                  onReceive={markAsReceived}
-                />
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              {[
+                {
+                  key: "ALL",
+                  label: "Mural completo",
+                  sub: "ver todos os presentes",
+                  crest: "https://commons.wikimedia.org/wiki/Special:FilePath/Coat%20of%20arms%20of%20Hogwarts.svg",
+                },
+                {
+                  key: "YASMIN",
+                  label: "Yasmin / Corvinal",
+                  sub: "vitrine da bruxa",
+                  crest: houses.YASMIN.crestUrl,
+                },
+                {
+                  key: "PEDRO",
+                  label: "Pedro / Grifinória",
+                  sub: "vitrine do bruxinho",
+                  crest: houses.PEDRO.crestUrl,
+                },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setView(item.key as HouseId | "ALL")}
+                  className={`castle-panel-soft flex items-center gap-4 px-4 py-4 text-left transition hover:-translate-y-0.5 ${
+                    view === item.key ? "ring-1 ring-amber-200/35" : ""
+                  }`}
+                >
+                  <img
+                    src={item.crest}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-14 w-14 shrink-0 object-contain"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-[0.7rem] uppercase tracking-[0.24em] text-amber-100/55">
+                      Casa
+                    </p>
+                    <h3 className="truncate font-[family-name:var(--font-display)] text-xl text-amber-50">
+                      {item.label}
+                    </h3>
+                    <p className="text-xs uppercase tracking-[0.22em] text-amber-100/55">
+                      {item.sub}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+          <div className="space-y-6">
+            <section className="castle-panel p-5">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
+                    Lista de presentes
+                  </p>
+                  <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                    Cada casa com seu espaço
+                  </h2>
+                </div>
+                <span className="castle-chip px-3 py-1 text-xs uppercase tracking-[0.2em] text-emerald-100">
+                  {activeGifts.length} em foco
+                </span>
               </div>
-            ) : (
-              <div className="grid gap-5">
-                <HouseColumn
-                  house={houses[view]}
-                  stats={view === "YASMIN" ? yasminStats : pedroStats}
-                  gifts={filteredGifts.filter((gift) => gift.house === view)}
-                  onEdit={editGift}
-                  onDelete={deleteGift}
-                  onReceive={markAsReceived}
-                />
-              </div>
-            )}
+
+              {view === "ALL" ? (
+                <div className="mt-5 grid gap-5">
+                  <HouseColumn
+                    house={houses.YASMIN}
+                    stats={yasminStats}
+                    gifts={filteredGifts.filter((gift) => gift.house === "YASMIN")}
+                    onEdit={editGift}
+                    onDelete={deleteGift}
+                    onReceive={markAsReceived}
+                  />
+                  <HouseColumn
+                    house={houses.PEDRO}
+                    stats={pedroStats}
+                    gifts={filteredGifts.filter((gift) => gift.house === "PEDRO")}
+                    onEdit={editGift}
+                    onDelete={deleteGift}
+                    onReceive={markAsReceived}
+                  />
+                </div>
+              ) : (
+                <div className="mt-5 grid gap-5">
+                  <HouseColumn
+                    house={houses[view]}
+                    stats={view === "YASMIN" ? yasminStats : pedroStats}
+                    gifts={filteredGifts.filter((gift) => gift.house === view)}
+                    onEdit={editGift}
+                    onDelete={deleteGift}
+                    onReceive={markAsReceived}
+                  />
+                </div>
+              )}
+            </section>
 
             <section className="castle-panel p-5">
               <div className="flex items-center justify-between gap-4">
@@ -818,30 +988,35 @@ export function MagicalHome() {
                   receivedGifts.map((gift) => (
                     <article
                       key={gift.id}
-                      className="castle-panel-soft p-4"
+                      className="castle-panel-soft overflow-hidden p-0"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="glyph-panel flex h-14 w-14 shrink-0 items-center justify-center text-2xl text-amber-50">
-                          {gift.house === "YASMIN" ? "🦅" : "🦁"}
+                      <div className="grid gap-0">
+                        <div className="relative">
+                          <img
+                            src={gift.imageUrl}
+                            alt={gift.name}
+                            className="h-56 w-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(8,10,18,0.75))]" />
+                          <div className="absolute left-4 top-4 castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.2em] text-amber-50">
+                            {houses[gift.house].schoolHouse}
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className="space-y-2 p-4">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="text-[0.66rem] uppercase tracking-[0.24em] text-amber-100/55">
-                                {houses[gift.house].schoolHouse}
-                              </p>
-                              <h3 className="truncate font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                              <h3 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
                                 {gift.name}
                               </h3>
+                              <p className="text-xs uppercase tracking-[0.22em] text-amber-100/55">
+                                recebido em {formatDate(gift.receivedAt ?? gift.createdAt)}
+                              </p>
                             </div>
                             <span className="castle-chip px-2 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-emerald-100">
                               ✦
                             </span>
                           </div>
-                          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-amber-100/55">
-                            recebido em {formatDate(gift.receivedAt ?? gift.createdAt)}
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-amber-100/74">
+                          <p className="text-sm leading-6 text-amber-100/74">
                             {gift.description}
                           </p>
                         </div>
@@ -870,34 +1045,13 @@ export function MagicalHome() {
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {[
-                  {
-                    title: "Grifinória",
-                    icon: "🦁",
-                    text: "coragem, impulso e faísca",
-                  },
-                  {
-                    title: "Sonserina",
-                    icon: "🐍",
-                    text: "astúcia, foco e presença",
-                  },
-                  {
-                    title: "Corvinal",
-                    icon: "🦅",
-                    text: "mente afiada e detalhe",
-                  },
-                  {
-                    title: "Lufa-Lufa",
-                    icon: "🦡",
-                    text: "cuidado, constância e aconchego",
-                  },
+                  { title: "Grifinória", crest: houseBadgeCrests.GRYFFINDOR, text: "coragem, impulso e faísca" },
+                  { title: "Sonserina", crest: houseBadgeCrests.SLYTHERIN, text: "astúcia, foco e presença" },
+                  { title: "Corvinal", crest: houseBadgeCrests.RAVENCLAW, text: "mente afiada e detalhe" },
+                  { title: "Lufa-Lufa", crest: houseBadgeCrests.HUFFLEPUFF, text: "cuidado, constância e aconchego" },
                 ].map((item) => (
                   <article key={item.title} className="castle-panel-soft p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-3xl">{item.icon}</span>
-                      <span className="castle-chip px-2 py-1 text-[0.65rem] uppercase tracking-[0.24em] text-amber-100/70">
-                        Hogwarts
-                      </span>
-                    </div>
+                    <img src={item.crest} alt="" aria-hidden="true" className="h-28 w-full object-contain" />
                     <h3 className="mt-4 font-[family-name:var(--font-display)] text-2xl text-amber-50">
                       {item.title}
                     </h3>
@@ -909,205 +1063,7 @@ export function MagicalHome() {
           </div>
 
           <aside className="space-y-5">
-            <div className="castle-panel p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
-                    Modo construtor
-                  </p>
-                  <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
-                    {editingGiftId ? "Editar desejo" : "Invocar presente"}
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => resetForm(selectedHouse)}
-                  className="castle-chip px-3 py-2 text-xs uppercase tracking-[0.24em] text-amber-100/70 transition hover:bg-white/5"
-                >
-                  Limpar
-                </button>
-              </div>
-
-              <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
-                <Field label="Casa">
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["YASMIN", "PEDRO"] as const).map((value) => (
-                      <label
-                        key={value}
-                        className={`rounded-2xl border px-4 py-3 text-sm transition ${
-                          formState.house === value
-                            ? "border-amber-200/40 bg-amber-200/10 text-amber-50"
-                            : "border-white/10 bg-white/5 text-amber-100/80 hover:bg-white/8"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="house"
-                          className="sr-only"
-                          checked={formState.house === value}
-                          onChange={() =>
-                            setFormState((current) => ({
-                              ...current,
-                              house: value,
-                              owner: value === "YASMIN" ? "HER" : "ME",
-                            }))
-                          }
-                        />
-                        {houses[value].label}
-                      </label>
-                    ))}
-                  </div>
-                </Field>
-
-                <Field label="Nome do desejo">
-                  <input
-                    required
-                    value={formState.name}
-                    onChange={(event) =>
-                      setFormState((current) => ({
-                        ...current,
-                        name: event.target.value,
-                      }))
-                    }
-                    className="input"
-                    placeholder="Ex: monitor fino para o MacBook"
-                  />
-                </Field>
-
-                <Field label="Link do produto">
-                  <input
-                    value={formState.productUrl}
-                    onChange={(event) =>
-                      setFormState((current) => ({
-                        ...current,
-                        productUrl: event.target.value,
-                      }))
-                    }
-                    className="input"
-                    placeholder="https://"
-                  />
-                </Field>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Preço">
-                    <input
-                      type="number"
-                      min="0"
-                      value={formState.price}
-                      onChange={(event) =>
-                        setFormState((current) => ({
-                          ...current,
-                          price: event.target.value,
-                        }))
-                      }
-                      className="input"
-                      placeholder="R$ 0"
-                    />
-                  </Field>
-
-                  <Field label="Prioridade">
-                    <select
-                      value={formState.priority}
-                      onChange={(event) =>
-                        setFormState((current) => ({
-                          ...current,
-                          priority: event.target.value,
-                        }))
-                      }
-                      className="input"
-                    >
-                      {["1", "2", "3", "4", "5"].map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                </div>
-
-                <Field label="Quando?">
-                  <div className="grid gap-2">
-                    {(["SHORT", "MEDIUM", "LONG"] as const).map((value) => (
-                      <label
-                        key={value}
-                        className={`rounded-2xl border px-4 py-3 text-sm transition ${
-                          formState.timeframe === value
-                            ? "border-amber-200/40 bg-amber-200/10 text-amber-50"
-                            : "border-white/10 bg-white/5 text-amber-100/80 hover:bg-white/8"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="timeframe"
-                          className="sr-only"
-                          checked={formState.timeframe === value}
-                          onChange={() =>
-                            setFormState((current) => ({
-                              ...current,
-                              timeframe: value,
-                            }))
-                          }
-                        />
-                        {timeframeLabels[value]}
-                      </label>
-                    ))}
-                  </div>
-                </Field>
-
-                <Field label="Para quem?">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {(["HER", "ME"] as const).map((value) => (
-                      <label
-                        key={value}
-                        className={`rounded-2xl border px-4 py-3 text-sm transition ${
-                          formState.owner === value
-                            ? "border-amber-200/40 bg-amber-200/10 text-amber-50"
-                            : "border-white/10 bg-white/5 text-amber-100/80 hover:bg-white/8"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="owner"
-                          className="sr-only"
-                          checked={formState.owner === value}
-                          onChange={() =>
-                            setFormState((current) => ({
-                              ...current,
-                              owner: value,
-                              house: value === "HER" ? "YASMIN" : "PEDRO",
-                            }))
-                          }
-                        />
-                        {ownerLabels[value]}
-                      </label>
-                    ))}
-                  </div>
-                </Field>
-
-                <Field label="Observação">
-                  <textarea
-                    value={formState.description}
-                    onChange={(event) =>
-                      setFormState((current) => ({
-                        ...current,
-                        description: event.target.value,
-                      }))
-                    }
-                    className="input min-h-28 resize-y"
-                    placeholder="Quero muito esse porque..."
-                  />
-                </Field>
-
-                <button
-                  type="submit"
-                  className="w-full castle-panel-soft px-5 py-4 font-medium text-slate-950 transition hover:scale-[1.01]"
-                >
-                  {editingGiftId ? "✦ Salvar alteração" : "✦ Salvar desejo"}
-                </button>
-              </form>
-            </div>
-
-            <div className="castle-panel p-5">
+            <section className="castle-panel p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
@@ -1146,9 +1102,38 @@ export function MagicalHome() {
                 <MiniStat label="Nível atual" value={overallLevel.level} />
                 <MiniStat label="Concluído" value={`${receivedRate}%`} />
               </div>
-            </div>
+            </section>
+
+            <section className="castle-panel p-5">
+              <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
+                Modo construtor
+              </p>
+              <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                O formulário ficou no modal
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-amber-100/72">
+                Clica em “Adicionar presente” para abrir a ficha e preencher sem apertar a página.
+              </p>
+              <button
+                type="button"
+                onClick={() => openComposer(selectedHouse)}
+                className="mt-4 castle-chip px-4 py-3 text-sm uppercase tracking-[0.2em] text-amber-50"
+              >
+                Abrir formulário
+              </button>
+            </section>
           </aside>
         </section>
+
+        <GiftComposerModal
+          open={composerOpen}
+          editingGiftId={editingGiftId}
+          formState={formState}
+          selectedHouse={selectedHouse}
+          onClose={() => setComposerOpen(false)}
+          onSubmit={handleSubmit}
+          setFormState={setFormState}
+        />
 
         {toast ? (
           <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 -translate-x-1/2 castle-panel-soft px-4 py-3 text-sm text-amber-50">
@@ -1243,6 +1228,269 @@ function Field({
   );
 }
 
+function GiftComposerModal({
+  open,
+  editingGiftId,
+  formState,
+  selectedHouse,
+  onClose,
+  onSubmit,
+  setFormState,
+}: {
+  open: boolean;
+  editingGiftId: string | null;
+  formState: GiftFormState;
+  selectedHouse: HouseId;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  setFormState: Dispatch<SetStateAction<GiftFormState>>;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 px-4 py-4 backdrop-blur-md sm:items-center">
+      <div
+        className="absolute inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className="relative w-full max-w-3xl castle-panel p-5 shadow-[0_30px_140px_rgba(0,0,0,0.62)]">
+        <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
+              Modo construtor
+            </p>
+            <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl text-amber-50">
+              {editingGiftId ? "Editar desejo" : "Invocar presente"}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="castle-chip px-3 py-2 text-xs uppercase tracking-[0.24em] text-amber-100/70"
+          >
+            Fechar
+          </button>
+        </div>
+
+        <form className="mt-5 grid gap-4 md:grid-cols-2" onSubmit={onSubmit}>
+          <div className="md:col-span-2">
+            <Field label="Casa">
+              <div className="grid grid-cols-2 gap-2">
+                {(["YASMIN", "PEDRO"] as const).map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm transition ${
+                      formState.house === value
+                        ? "castle-chip text-amber-50"
+                        : "castle-panel-soft text-amber-100/80 hover:bg-white/8"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="house"
+                      className="sr-only"
+                      checked={formState.house === value}
+                      onChange={() =>
+                        setFormState((current) => ({
+                          ...current,
+                          house: value,
+                          owner: value === "YASMIN" ? "HER" : "ME",
+                        }))
+                      }
+                    />
+                    <span className="text-xl">{value === "YASMIN" ? "🦅" : "🦁"}</span>
+                    {houses[value].label}
+                  </label>
+                ))}
+              </div>
+            </Field>
+          </div>
+
+          <Field label="Nome do desejo">
+            <input
+              required
+              value={formState.name}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  name: event.target.value,
+                }))
+              }
+              className="input"
+              placeholder="Ex: monitor fino para o MacBook"
+            />
+          </Field>
+
+          <Field label="Link do produto">
+            <input
+              value={formState.productUrl}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  productUrl: event.target.value,
+                }))
+              }
+              className="input"
+              placeholder="https://"
+            />
+          </Field>
+
+          <Field label="Imagem do presente">
+            <input
+              required
+              value={formState.imageUrl}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  imageUrl: event.target.value,
+                }))
+              }
+              className="input"
+              placeholder="https://..."
+            />
+          </Field>
+
+          <Field label="Observação">
+            <textarea
+              value={formState.description}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+              className="input min-h-28 resize-y"
+              placeholder="Quero muito esse porque..."
+            />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-3 md:col-span-2">
+            <Field label="Preço">
+              <input
+                type="number"
+                min="0"
+                value={formState.price}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    price: event.target.value,
+                  }))
+                }
+                className="input"
+                placeholder="R$ 0"
+              />
+            </Field>
+
+            <Field label="Prioridade">
+              <select
+                value={formState.priority}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    priority: event.target.value,
+                  }))
+                }
+                className="input"
+              >
+                {["1", "2", "3", "4", "5"].map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
+
+          <Field label="Quando?">
+            <div className="grid gap-2">
+              {(["SHORT", "MEDIUM", "LONG"] as const).map((value) => (
+                <label
+                  key={value}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm transition ${
+                    formState.timeframe === value
+                      ? "castle-chip text-amber-50"
+                      : "castle-panel-soft text-amber-100/80 hover:bg-white/8"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="timeframe"
+                    className="sr-only"
+                    checked={formState.timeframe === value}
+                    onChange={() =>
+                      setFormState((current) => ({
+                        ...current,
+                        timeframe: value,
+                      }))
+                    }
+                  />
+                  <span>
+                    {value === "SHORT" ? "🦉" : value === "MEDIUM" ? "✨" : "🔮"}
+                  </span>
+                  {timeframeLabels[value]}
+                </label>
+              ))}
+            </div>
+          </Field>
+
+          <Field label="Para quem?">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {(["HER", "ME"] as const).map((value) => (
+                <label
+                  key={value}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm transition ${
+                    formState.owner === value
+                      ? "castle-chip text-amber-50"
+                      : "castle-panel-soft text-amber-100/80 hover:bg-white/8"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="owner"
+                    className="sr-only"
+                    checked={formState.owner === value}
+                    onChange={() =>
+                      setFormState((current) => ({
+                        ...current,
+                        owner: value,
+                        house: value === "HER" ? "YASMIN" : "PEDRO",
+                      }))
+                    }
+                  />
+                  <span>{value === "HER" ? "🦅" : "🦁"}</span>
+                  {ownerLabels[value]}
+                </label>
+              ))}
+            </div>
+          </Field>
+
+          <div className="md:col-span-2 flex items-center justify-between gap-3">
+            <span className="text-xs uppercase tracking-[0.22em] text-amber-100/55">
+              {houses[selectedHouse].schoolHouse}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="castle-chip px-4 py-3 text-xs uppercase tracking-[0.24em] text-amber-100/70"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="castle-chip bg-amber-200/15 px-4 py-3 text-xs uppercase tracking-[0.24em] text-amber-50"
+              >
+                {editingGiftId ? "Salvar alteração" : "Salvar desejo"}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function HouseColumn({
   house,
   stats,
@@ -1277,7 +1525,7 @@ function HouseColumn({
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 castle-chip px-3 py-1 text-[0.72rem] uppercase tracking-[0.28em] text-amber-100/75">
-              <span className="text-lg">{house.symbol}</span>
+              <img src={house.crestUrl} alt="" aria-hidden="true" className="h-6 w-6 object-contain" />
               {house.label}
             </div>
             <div>
@@ -1301,10 +1549,10 @@ function HouseColumn({
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-3">
-            <HouseMini label="Pendentes" value={stats.wanted} />
-            <HouseMini label="Comprados" value={stats.received} />
-            <HouseMini label="Concluído" value={`${stats.percent}%`} />
-          </div>
+          <HouseMini label="Pendentes" value={stats.wanted} />
+          <HouseMini label="Comprados" value={stats.received} />
+          <HouseMini label="Concluído" value={`${stats.percent}%`} />
+        </div>
 
         <div className="mt-4">
           <ProgressSection label={`${house.label} XP`} value={stats.xp} max={stats.nextThreshold} />
@@ -1386,80 +1634,82 @@ function HeroStat({
   );
 }
 
-function HogwartsMural() {
-  const trio = [
-    {
-      name: "Harry",
-      icon: "⚡",
-      house: "Grifinória",
-      note: "o impulso do trio",
-      glow: "from-amber-300/40 to-orange-300/10",
-    },
-    {
-      name: "Rony",
-      icon: "♟",
-      house: "Grifinória",
-      note: "o coração e o humor",
-      glow: "from-rose-300/30 to-orange-200/10",
-    },
-    {
-      name: "Hermione",
-      icon: "📚",
-      house: "Corvinal",
-      note: "a estratégia que costura tudo",
-      glow: "from-sky-300/30 to-cyan-200/10",
-    },
-  ] as const;
-
+function HogwartsMural({
+  cards,
+}: {
+  cards: Array<{ name: string; crest: string; percent: number; hue: string }>;
+}) {
   return (
-    <div className="relative mt-4 overflow-hidden border border-white/10 bg-[linear-gradient(180deg,rgba(15,18,30,0.98),rgba(8,10,16,0.98))]">
-      <div className="absolute inset-0 opacity-50 castle-etch" />
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(11,12,18,0.92))]" />
-      <div className="relative grid gap-3 p-3 sm:grid-cols-3">
-        {trio.map((person) => (
-          <article
-            key={person.name}
-            className="castle-panel-soft min-h-44 overflow-hidden p-4"
-          >
-            <div className={`absolute inset-0 bg-gradient-to-br ${person.glow}`} />
-            <div className="relative flex h-full flex-col justify-between gap-4">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-[0.66rem] uppercase tracking-[0.24em] text-amber-100/55">
-                    Bruxo do salão
-                  </p>
-                  <h3 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
-                    {person.name}
-                  </h3>
+    <div className="relative mt-4 overflow-hidden border border-white/10 bg-[linear-gradient(180deg,rgba(9,12,24,0.98),rgba(10,12,18,0.98))]">
+      <div className="absolute inset-0 opacity-45 castle-etch" />
+      <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(86,66,160,0.2),transparent)]" />
+      <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,transparent,rgba(7,8,14,0.94))]" />
+
+      <div className="relative p-4 sm:p-5">
+        <div className="flex items-center justify-center">
+          <span className="castle-chip px-4 py-2 text-[0.72rem] uppercase tracking-[0.3em] text-amber-100/80">
+            Sorted today
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {cards.map((card) => (
+            <article key={card.name} className={`castle-panel-soft overflow-hidden border-t-4 bg-[#121325]/88 ${card.hue}`}>
+              <div className="flex items-center justify-between px-4 py-3">
+                <img src={card.crest} alt="" aria-hidden="true" className="h-14 w-14 object-contain" />
+                <span className="text-xs uppercase tracking-[0.22em] text-amber-100/55">house</span>
+              </div>
+              <div className="px-4 pb-4">
+                <h3 className="font-[family-name:var(--font-display)] text-2xl text-amber-50">
+                  {card.name}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-amber-100/72">
+                  {card.percent}% da energia do cofre hoje
+                </p>
+                <div className="mt-3 h-2 bg-white/8">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-300 via-orange-300 to-amber-100"
+                    style={{ width: `${Math.min(100, card.percent)}%` }}
+                  />
                 </div>
-                <span className="text-2xl">{person.icon}</span>
               </div>
-              <div className="space-y-2">
-                <p className="text-sm leading-6 text-amber-100/72">{person.note}</p>
-                <span className="inline-flex items-center gap-2 castle-chip px-3 py-1 text-[0.72rem] uppercase tracking-[0.22em] text-amber-100/80">
-                  {person.house}
-                </span>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-      <div className="relative border-t border-white/10 px-4 py-3">
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { label: "Grifinória", icon: "🦁", tone: "text-amber-200" },
-            { label: "Sonserina", icon: "🐍", tone: "text-emerald-200" },
-            { label: "Corvinal", icon: "🦅", tone: "text-sky-200" },
-            { label: "Lufa-Lufa", icon: "🦡", tone: "text-yellow-100" },
-          ].map((house) => (
-            <div
-              key={house.label}
-              className="castle-chip flex items-center justify-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.22em] text-amber-50"
-            >
-              <span className={`text-sm ${house.tone}`}>{house.icon}</span>
-              <span>{house.label}</span>
-            </div>
+            </article>
           ))}
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
+              Hogwarts notes
+            </p>
+            <h3 className="font-[family-name:var(--font-display)] text-4xl leading-none text-amber-50 sm:text-5xl">
+              What&apos;s your Hogwarts house?
+            </h3>
+            <p className="max-w-xl text-sm leading-7 text-amber-100/72 sm:text-base">
+              O clima do castelo agora entra no site como uma vitrine editorial: placas,
+              brasões, brilho e espaço para a história crescer aos poucos.
+            </p>
+          </div>
+
+          <div className="castle-panel-soft p-4">
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { label: "Grifinória", icon: "🦁", tone: "text-red-300" },
+                { label: "Corvinal", icon: "🦅", tone: "text-sky-200" },
+                { label: "Lufa-Lufa", icon: "🦡", tone: "text-yellow-100" },
+                { label: "Sonserina", icon: "🐍", tone: "text-emerald-200" },
+              ].map((house) => (
+                <div key={house.label} className="castle-chip flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-[0.2em] text-amber-50">
+                  <span className={`text-sm ${house.tone}`}>{house.icon}</span>
+                  <span>{house.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 border-t border-white/10 pt-3 text-sm leading-6 text-amber-100/70">
+              Harry, Rony e Hermione entram como eco de fundo, enquanto Pedro e Yasmin ganham
+              a própria casa no cofre.
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1479,66 +1729,64 @@ function GiftCard({
 }) {
   return (
     <article className="group overflow-hidden castle-panel-soft transition hover:-translate-y-1">
-      <div className="grid gap-0 md:grid-cols-[7.5rem_1fr]">
-        <div className="relative flex min-h-44 flex-col justify-between border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,214,122,0.12),rgba(255,255,255,0.02))] p-4 md:border-b-0 md:border-r">
-          <div className="flex items-center justify-between">
-            <span className="text-2xl">{gift.house === "YASMIN" ? "🦅" : "🦁"}</span>
-            <span className="text-xs uppercase tracking-[0.22em] text-amber-100/55">
-              {gift.priority}
-            </span>
-          </div>
-          <div className="glyph-panel flex flex-1 items-center justify-center text-4xl text-amber-50">
-            {gift.timeframe === "SHORT" ? "✦" : gift.timeframe === "MEDIUM" ? "❖" : "✧"}
-          </div>
-          <p className="text-[0.65rem] uppercase tracking-[0.24em] text-amber-100/60">
-            slot vazio
+      <div className="relative">
+        <img
+          src={gift.imageUrl}
+          alt={gift.name}
+          className="h-64 w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(8,10,18,0.82))]" />
+        <div className="absolute left-4 top-4 flex items-center gap-2">
+          <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50">
+            {houses[gift.house].schoolHouse}
+          </span>
+          <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50">
+            {gift.priority}
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-4 p-4">
+        <div className="flex flex-wrap gap-2">
+          <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
+            {timeframeShortLabels[gift.timeframe]}
+          </span>
+          <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
+            {gift.owner === "HER" ? "Yasmin" : "Pedro"}
+          </span>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.24em] text-amber-100/70">
+            {gift.status === "RECEIVED" ? "Desejo realizado" : "Desejo em curso"}
           </p>
+          <h3 className="mt-1 font-[family-name:var(--font-display)] text-3xl leading-tight text-amber-50">
+            {gift.name}
+          </h3>
+        </div>
+        <p className="text-sm leading-6 text-amber-100/76">{gift.description}</p>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-base font-medium text-amber-50">{currency(gift.price)}</p>
+          <span className="castle-chip px-3 py-1 text-xs uppercase tracking-[0.2em] text-amber-100/70">
+            prioridade {gift.priority}
+          </span>
         </div>
 
-        <div className="flex min-w-0 flex-col justify-between gap-4 p-4">
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
-                {timeframeShortLabels[gift.timeframe]}
-              </span>
-              <span className="castle-chip px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-amber-50/90">
-                {gift.owner === "HER" ? "Yasmin" : "Pedro"}
-              </span>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-amber-100/70">
-                {gift.status === "RECEIVED" ? "Desejo realizado" : "Desejo em curso"}
-              </p>
-              <h3 className="mt-1 font-[family-name:var(--font-display)] text-3xl leading-tight text-amber-50">
-                {gift.name}
-              </h3>
-            </div>
-            <p className="text-sm leading-6 text-amber-100/76">{gift.description}</p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-base font-medium text-amber-50">{currency(gift.price)}</p>
-            <span className="castle-chip px-3 py-1 text-xs uppercase tracking-[0.2em] text-amber-100/70">
-              prioridade {gift.priority}
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <ActionButton onClick={() => onEdit(gift)}>Editar</ActionButton>
-            <ActionButton onClick={() => onReceive(gift.id)}>
-              Marcar como recebido
-            </ActionButton>
-            <ActionButton onClick={() => onDelete(gift.id)}>Excluir</ActionButton>
-          </div>
-
-          <a
-            href={gift.productUrl}
-            className="inline-flex items-center gap-2 text-sm text-amber-200 transition hover:text-amber-100"
-          >
-            Ver presente
-            <span aria-hidden>↗</span>
-          </a>
+        <div className="flex flex-wrap gap-2">
+          <ActionButton onClick={() => onEdit(gift)}>Editar</ActionButton>
+          <ActionButton onClick={() => onReceive(gift.id)}>
+            Marcar como recebido
+          </ActionButton>
+          <ActionButton onClick={() => onDelete(gift.id)}>Excluir</ActionButton>
         </div>
+
+        <a
+          href={gift.productUrl}
+          className="inline-flex items-center gap-2 text-sm text-amber-200 transition hover:text-amber-100"
+        >
+          Ver presente
+          <span aria-hidden>↗</span>
+        </a>
       </div>
     </article>
   );
