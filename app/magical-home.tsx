@@ -599,9 +599,9 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
 
   return (
     <main className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,214,153,0.22),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(118,92,255,0.16),transparent_28%),linear-gradient(180deg,rgba(12,15,28,0.96),rgba(8,10,18,1))]" />
-      <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_center,black_30%,transparent_90%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[url('/backgrounds/hp-stars.png')] bg-cover bg-center opacity-30 mix-blend-screen" />
+      <div className="pointer-events-none absolute inset-0 castle-atmosphere bg-[radial-gradient(circle_at_top_left,rgba(255,214,153,0.22),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(118,92,255,0.16),transparent_28%),linear-gradient(180deg,rgba(12,15,28,0.96),rgba(8,10,18,1))]" />
+      <div className="pointer-events-none absolute inset-0 castle-grid opacity-60 [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(circle_at_center,black_30%,transparent_90%)]" />
+      <div className="pointer-events-none absolute inset-0 castle-stars bg-[url('/backgrounds/hp-stars.png')] bg-cover bg-center opacity-30 mix-blend-screen" />
       {owlFlightActive ? <FlyingOwl key={owlFlightVersion} /> : null}
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-7 px-4 py-5 text-amber-50 sm:px-6 lg:px-8">

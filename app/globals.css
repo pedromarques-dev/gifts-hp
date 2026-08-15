@@ -43,6 +43,33 @@ body {
   font-family: var(--font-body), sans-serif;
 }
 
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  body {
+    background-attachment: scroll, scroll, scroll, scroll, scroll, scroll;
+    background-size: cover, cover, auto, auto, auto, auto;
+  }
+
+  .castle-panel,
+  .castle-panel-soft {
+    clip-path: none;
+    border-radius: 1.5rem;
+  }
+
+  .castle-grid {
+    opacity: 0.25;
+    mask-image: linear-gradient(180deg, black, transparent 85%);
+  }
+
+  .castle-stars {
+    opacity: 0.16;
+    mix-blend-mode: normal;
+  }
+
+  .castle-atmosphere {
+    opacity: 0.9;
+  }
+}
+
 button,
 input,
 textarea,
