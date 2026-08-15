@@ -132,6 +132,23 @@ function currency(value?: number) {
   }).format(value);
 }
 
+function formatCurrencyInput(value: string) {
+  if (!value) return "";
+
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "";
+
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(Number(digits));
+}
+
+function extractCurrencyDigits(value: string) {
+  return value.replace(/\D/g, "");
+}
+
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
@@ -1002,13 +1019,13 @@ function GiftComposerModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 px-4 py-4 backdrop-blur-md sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/80 px-3 py-3 backdrop-blur-md sm:items-center sm:px-4 sm:py-4">
       <div
         className="absolute inset-0"
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative w-full max-w-3xl castle-panel p-5 shadow-[0_30px_140px_rgba(0,0,0,0.62)]">
+      <div className="relative my-auto flex w-full max-w-3xl max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden castle-panel p-4 shadow-[0_30px_140px_rgba(0,0,0,0.62)] sm:p-5">
         <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-amber-200/55">
@@ -1027,7 +1044,7 @@ function GiftComposerModal({
           </button>
         </div>
 
-        <form className="mt-5 grid gap-4 md:grid-cols-2" onSubmit={onSubmit}>
+        <form className="mt-5 grid flex-1 gap-4 overflow-y-auto pr-1 md:grid-cols-2" onSubmit={onSubmit}>
           <div className="md:col-span-2">
             <Field label="Casa">
               <div className="grid grid-cols-2 gap-2">
@@ -1036,7 +1053,7 @@ function GiftComposerModal({
                     key={value}
                     className={`flex items-center gap-3 px-4 py-3 text-sm transition ${
                       formState.house === value
-                        ? "castle-chip text-amber-50"
+                        ? "castle-chip border border-amber-200/30 bg-amber-200/18 text-amber-50 shadow-[0_0_0_1px_rgba(255,214,153,0.18),0_14px_30px_rgba(0,0,0,0.24)] ring-1 ring-amber-100/20 scale-[1.01]"
                         : "castle-panel-soft text-amber-100/80 hover:bg-white/8"
                     }`}
                   >
@@ -1053,7 +1070,9 @@ function GiftComposerModal({
                         }))
                       }
                     />
-                    <span className="text-xl">{value === "YASMIN" ? "🦅" : "🦁"}</span>
+                    <span className={`text-xl ${formState.house === value ? "scale-110" : ""}`}>
+                      {value === "YASMIN" ? "🐍" : "🦁"}
+                    </span>
                     {houses[value].label}
                   </label>
                 ))}
@@ -1120,15 +1139,15 @@ function GiftComposerModal({
           </Field>
 
           <div className="grid grid-cols-2 gap-3 md:col-span-2">
-            <Field label="Preço">
-              <input
-                type="number"
-                min="0"
-                value={formState.price}
+          <Field label="Preço">
+            <input
+                type="text"
+                inputMode="numeric"
+                value={formatCurrencyInput(formState.price)}
                 onChange={(event) =>
                   setFormState((current) => ({
                     ...current,
-                    price: event.target.value,
+                    price: extractCurrencyDigits(event.target.value),
                   }))
                 }
                 className="input"
@@ -1195,7 +1214,7 @@ function GiftComposerModal({
                   key={value}
                   className={`flex items-center gap-3 px-4 py-3 text-sm transition ${
                     formState.owner === value
-                      ? "castle-chip text-amber-50"
+                      ? "castle-chip border border-amber-200/30 bg-amber-200/18 text-amber-50 shadow-[0_0_0_1px_rgba(255,214,153,0.18),0_14px_30px_rgba(0,0,0,0.24)] ring-1 ring-amber-100/20 scale-[1.01]"
                       : "castle-panel-soft text-amber-100/80 hover:bg-white/8"
                   }`}
                 >
@@ -1211,8 +1230,10 @@ function GiftComposerModal({
                         house: value === "HER" ? "YASMIN" : "PEDRO",
                       }))
                     }
-                  />
-                  <span>{value === "HER" ? "🦅" : "🦁"}</span>
+                    />
+                  <span className={`text-xl ${formState.owner === value ? "scale-110" : ""}`}>
+                    {value === "HER" ? "🦅" : "🦁"}
+                  </span>
                   {ownerLabels[value]}
                 </label>
               ))}
