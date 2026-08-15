@@ -252,6 +252,30 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
     );
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadGifts() {
+      try {
+        const response = await fetch("/api/gifts", { cache: "no-store" });
+        if (!response.ok) return;
+
+        const data = (await response.json()) as { gifts?: Gift[] };
+        if (!cancelled && Array.isArray(data.gifts)) {
+          setGifts(data.gifts);
+        }
+      } catch {
+        // Keep the current in-memory list if the API is temporarily unavailable.
+      }
+    }
+
+    void loadGifts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filteredGifts = useMemo(() => {
     return gifts.filter((gift) => {
       const matchesHouse = view === "ALL" || gift.house === view;
