@@ -1,6 +1,12 @@
 "use client";
 
-import type { Dispatch, FormEvent, ReactNode, SetStateAction } from "react";
+import type {
+  Dispatch,
+  FormEvent,
+  MutableRefObject,
+  ReactNode,
+  SetStateAction,
+} from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   Gift,
@@ -152,62 +158,35 @@ function levelFromXp(xp: number) {
   };
 }
 
-function useWizardSoundtrack(enabled: boolean) {
-  const audioRef = useRef<AudioContext | null>(null);
-  const intervalRef = useRef<number | null>(null);
-  const stepRef = useRef(0);
-
+function useLoopingSoundtrack(enabled: boolean, audioRef: MutableRefObject<HTMLAudioElement | null>) {
   useEffect(() => {
+    const audio = audioRef.current ?? new Audio("/audio/theme.mp3");
+    audioRef.current = audio;
+    audio.loop = true;
+    audio.preload = "auto";
+
     if (!enabled) {
-      if (intervalRef.current) {
-        window.clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      audio.pause();
+      audio.currentTime = 0;
       return;
     }
 
-    const AudioContextClass =
-      window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-
-    if (!AudioContextClass) return;
-
-    const audio = audioRef.current ?? new AudioContextClass();
-    audioRef.current = audio;
-    audio.resume().catch(() => {
-      // Autoplay can fail until the browser considers the gesture trusted.
+    void audio.play().catch(() => {
+      // Browser autoplay rules can delay playback until the next trusted click.
     });
 
-    const notes = [523.25, 659.25, 783.99, 987.77, 880, 659.25];
-
-    const playChord = () => {
-      const now = audio.currentTime;
-      const root = notes[stepRef.current % notes.length];
-      const chord = [root, root * 1.25, root * 1.5];
-
-      chord.forEach((frequency, index) => {
-        const osc = audio.createOscillator();
-        const gain = audio.createGain();
-        osc.type = index === 0 ? "triangle" : "sine";
-        osc.frequency.setValueAtTime(frequency, now);
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(0.02, now + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
-        osc.connect(gain).connect(audio.destination);
-        osc.start(now);
-        osc.stop(now + 1.7);
+    const resume = () => {
+      void audio.play().catch(() => {
+        // If the browser still blocks it, the next user gesture will retry.
       });
-
-      stepRef.current += 1;
     };
 
-    playChord();
-    intervalRef.current = window.setInterval(playChord, 1900);
+    window.addEventListener("pointerdown", resume, { once: true, passive: true });
+    window.addEventListener("keydown", resume, { once: true, passive: true });
 
     return () => {
-      if (intervalRef.current) {
-        window.clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      window.removeEventListener("pointerdown", resume);
+      window.removeEventListener("keydown", resume);
     };
   }, [enabled]);
 }
@@ -219,11 +198,12 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
   const [statusFilter, setStatusFilter] = useState<GiftStatus | "ANY">("ANY");
   const [editingGiftId, setEditingGiftId] = useState<string | null>(null);
   const [selectedHouse, setSelectedHouse] = useState<HouseId>("YASMIN");
-  const [soundOn, setSoundOn] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const [owlAlert, setOwlAlert] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [greeting, setGreeting] = useState("Bem-vindo");
+  const soundtrackRef = useRef<HTMLAudioElement | null>(null);
   const [formState, setFormState] = useState<GiftFormState>({
     name: "",
     description: "",
@@ -237,7 +217,26 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
     house: "YASMIN",
   });
 
-  useWizardSoundtrack(soundOn);
+  useLoopingSoundtrack(soundOn, soundtrackRef);
+
+  function toggleSoundtrack() {
+    const next = !soundOn;
+    setSoundOn(next);
+
+    const audio = soundtrackRef.current ?? new Audio("/audio/theme.mp3");
+    soundtrackRef.current = audio;
+    audio.loop = true;
+    audio.preload = "auto";
+
+    if (next) {
+      void audio.play().catch(() => {
+        // The hook will retry on the next trusted interaction.
+      });
+    } else {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }
 
   useEffect(() => {
     if (!toast) return;
@@ -524,10 +523,15 @@ export function MagicalHome({ initialGifts }: { initialGifts: Gift[] }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSoundOn((value) => !value)}
-                  className="castle-chip px-3 py-2 text-sm text-amber-100/80 transition hover:bg-white/10"
+                  onClick={toggleSoundtrack}
+                  aria-pressed={soundOn}
+                  className={`castle-chip px-3 py-2 text-sm transition ${
+                    soundOn
+                      ? "bg-amber-200/14 text-amber-50 ring-1 ring-amber-200/25"
+                      : "text-amber-100/80 hover:bg-white/10"
+                  }`}
                 >
-                  {soundOn ? "Som ligado" : "Trilha mágica original"}
+                  {soundOn ? "Trilha mágica ligada" : "Ligar trilha mágica"}
                 </button>
               </div>
 
