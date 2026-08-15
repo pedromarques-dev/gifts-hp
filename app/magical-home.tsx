@@ -129,12 +129,17 @@ function extractCurrencyDigits(value: string) {
 }
 
 function formatDate(date: string) {
+  const parsed = new Date(date.length === 10 ? `${date}T12:00:00Z` : date);
+  if (Number.isNaN(parsed.getTime())) {
+    return "data desconhecida";
+  }
+
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     timeZone: "UTC",
-  }).format(new Date(`${date}T12:00:00`));
+  }).format(parsed);
 }
 
 function xpForGift(gift: Gift) {
