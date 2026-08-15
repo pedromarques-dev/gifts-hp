@@ -4,7 +4,7 @@ import { MagicalHome } from "./magical-home";
 export const metadata: Metadata = {
   title: "The Room of Wishes",
   description:
-    "A magical shared wishlist for two people who want their gifts to feel like part of the story.",
+    "A wizard-level shared wishlist game for Pedro and Yasmin, with magical progress, levels, and original enchanted art.",
 };
 
 export default function Page() {

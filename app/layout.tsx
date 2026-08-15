@@ -28,11 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
       template: "%s | The Room of Wishes",
     },
     description:
-      "A magical shared wishlist for two people who want their gifts to feel like part of the story.",
+      "A wizard-level shared wishlist game for Pedro and Yasmin, with magical progress, levels, and original enchanted art.",
     openGraph: {
       title: "The Room of Wishes",
       description:
-        "A magical shared wishlist for two people who want their gifts to feel like part of the story.",
+        "A wizard-level shared wishlist game for Pedro and Yasmin, with magical progress, levels, and original enchanted art.",
       type: "website",
       images: ["/og.png"],
     },
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "The Room of Wishes",
       description:
-        "A magical shared wishlist for two people who want their gifts to feel like part of the story.",
+        "A wizard-level shared wishlist game for Pedro and Yasmin, with magical progress, levels, and original enchanted art.",
       images: ["/og.png"],
     },
     icons: {
