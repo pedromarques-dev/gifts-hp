@@ -216,11 +216,25 @@ async function compressImageFile(file: File) {
       img.src = sourceUrl;
     });
 
+    const targetAspect = 4 / 5;
+    const sourceAspect = image.width / image.height;
+    let sx = 0;
+    let sy = 0;
+    let sw = image.width;
+    let sh = image.height;
+
+    if (sourceAspect > targetAspect) {
+      sw = Math.round(image.height * targetAspect);
+      sx = Math.round((image.width - sw) / 2);
+    } else if (sourceAspect < targetAspect) {
+      sh = Math.round(image.width / targetAspect);
+      sy = Math.round((image.height - sh) / 2);
+    }
+
     const maxSide = 1400;
-    const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
     const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(image.width * ratio));
-    canvas.height = Math.max(1, Math.round(image.height * ratio));
+    canvas.width = maxSide;
+    canvas.height = Math.round(maxSide / targetAspect);
 
     const context = canvas.getContext("2d");
     if (!context) {
@@ -229,7 +243,7 @@ async function compressImageFile(file: File) {
 
     context.fillStyle = "#0b0f1a";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    context.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
 
     return canvas.toDataURL("image/jpeg", 0.86);
   } finally {
@@ -1272,13 +1286,20 @@ function GiftComposerModal({
             <div className="space-y-3">
               <div className="castle-panel-soft overflow-hidden">
                 {formState.imageUrl ? (
-                  <img
-                    src={formState.imageUrl}
-                    alt="Pré-visualização da imagem do presente"
-                    className="h-40 w-full object-cover"
-                  />
+                  <div className="relative aspect-[4/5] w-full overflow-hidden">
+                    <img
+                      src={formState.imageUrl}
+                      alt="Pré-visualização da imagem do presente"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgba(6,8,16,0.88))] px-4 py-3">
+                      <p className="text-[0.68rem] uppercase tracking-[0.22em] text-amber-100/70">
+                        Corte automático central
+                      </p>
+                    </div>
+                  </div>
                 ) : (
-                  <div className="flex h-40 items-center justify-center px-4 text-center text-sm text-amber-100/60">
+                  <div className="flex aspect-[4/5] items-center justify-center px-4 text-center text-sm text-amber-100/60">
                     Envie uma foto do celular ou cole um link de imagem.
                   </div>
                 )}
@@ -1810,10 +1831,19 @@ function GiftCard({
 
         <div className="flex flex-wrap gap-2">
           <ActionButton onClick={() => onEdit(gift)}>Editar</ActionButton>
-          <ActionButton onClick={() => onReceive(gift.id)}>
-            Marcar como recebido
+          {gift.status === "RECEIVED" ? (
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/12 px-3 py-2 text-xs uppercase tracking-[0.18em] text-emerald-100">
+              <span aria-hidden>✔</span>
+              Comprado
+            </span>
+          ) : (
+            <ActionButton variant="primary" onClick={() => onReceive(gift.id)}>
+              ✦ Marcar como comprado
+            </ActionButton>
+          )}
+          <ActionButton variant="danger" onClick={() => onDelete(gift.id)}>
+            Excluir
           </ActionButton>
-          <ActionButton onClick={() => onDelete(gift.id)}>Excluir</ActionButton>
         </div>
 
         {gift.productUrl.trim() ? (
@@ -1835,15 +1865,24 @@ function GiftCard({
 function ActionButton({
   children,
   onClick,
+  variant = "default",
 }: {
   children: ReactNode;
   onClick: () => void;
+  variant?: "default" | "primary" | "danger";
 }) {
+  const styles =
+    variant === "primary"
+      ? "border border-amber-200/28 bg-[linear-gradient(135deg,rgba(255,219,128,0.98),rgba(255,183,76,0.96))] text-slate-950 shadow-[0_16px_35px_rgba(255,194,88,0.22)] hover:brightness-105"
+      : variant === "danger"
+        ? "border border-rose-300/18 bg-rose-300/10 text-rose-100 hover:bg-rose-300/16"
+        : "text-amber-100/78 hover:bg-amber-200/10 hover:text-amber-50";
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className="castle-chip px-3 py-2 text-xs uppercase tracking-[0.18em] text-amber-100/78 transition hover:bg-amber-200/10 hover:text-amber-50"
+      className={`castle-chip px-3 py-2 text-xs uppercase tracking-[0.18em] transition ${styles}`}
     >
       {children}
     </button>
