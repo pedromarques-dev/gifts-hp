@@ -1184,6 +1184,23 @@ function MiniStat({
   );
 }
 
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-xs uppercase tracking-[0.24em] text-amber-100/60">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
 function HouseColumn({
   house,
   stats,
