@@ -13,11 +13,19 @@ export async function PATCH(request: Request, context: RouteContext) {
   const { id } = context.params;
   const payload = (await request.json()) as Partial<GiftPayload>;
   const gift = await updateGift(id, payload);
-  return Response.json({ gift });
+  const response = Response.json({ gift });
+  response.headers.set("Cache-Control", "no-store, max-age=0, must-revalidate");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  return response;
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
   const { id } = context.params;
   const gift = await removeGift(id);
-  return Response.json({ gift });
+  const response = Response.json({ gift });
+  response.headers.set("Cache-Control", "no-store, max-age=0, must-revalidate");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  return response;
 }
