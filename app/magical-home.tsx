@@ -1312,11 +1312,10 @@ function GiftComposerModal({
 
               <div className="flex flex-wrap gap-2">
                 <label className={`castle-chip cursor-pointer px-4 py-3 text-xs uppercase tracking-[0.24em] text-amber-50 ${imageUploading ? "opacity-70" : ""}`}>
-                  {imageUploading ? "Processando foto..." : "Enviar foto do celular"}
+                  {imageUploading ? "Processando foto..." : "Escolher foto"}
                   <input
                     type="file"
                     accept="image/*"
-                    capture="environment"
                     className="sr-only"
                     disabled={imageUploading}
                     onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -1339,6 +1338,10 @@ function GiftComposerModal({
                   Limpar imagem
                 </button>
               </div>
+
+              <p className="text-xs leading-5 text-amber-100/55">
+                Você pode escolher uma foto da galeria ou tirar uma nova na hora.
+              </p>
 
               <input
                 value={formState.imageUrl}
